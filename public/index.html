@@ -242,6 +242,7 @@
                         </div>
                         <div id="status-${model.name}" class="update-status"></div>
                     </div>
+                    <div class="tags" id="tags-${model.name}">${model.tags && "Tags: "+model.tags}</div>
                 </div>
             `).join('');
         }
@@ -291,7 +292,7 @@
             } else {
                 // If it's a simple value, put it on the same line
                 
-                const tag = value.toString().includes(`\n`) ? "pre" :"span"
+                const tag = value && value.toString().includes(`\n`) ? "pre" :"span"
                 html +=  `<${tag} style="${tag == "pre" && "margin-left:20px"}">${formatNestedHtml(value, depth + 1)}</${tag}>`;
             }
             

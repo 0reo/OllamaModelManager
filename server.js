@@ -101,6 +101,8 @@ app.get('/api/models', async (req, res) => {
                 const detailsResponse = await axios.post(`${ollamaEndpoint}/api/show`, {
                     name: model.name
                 });
+                // console.log(detailsResponse.data.model_info['general.tags'] !== undefined && model.name);
+                
                 return {
                     ...model,
                     // details: {
@@ -113,8 +115,10 @@ app.get('/api/models', async (req, res) => {
                     // },
                     details: detailsResponse.data.details,
                     capabilities: detailsResponse.data.capabilities || '',
-                    parameters: detailsResponse.data.parameters,
-                    template: detailsResponse.data.template,
+                    parameters: detailsResponse.data.parameters || '',
+                    template: detailsResponse.data.template || '',
+                    tags: detailsResponse.data.model_info["general.tags"] || '',
+                    model_info: detailsResponse.data.model_info || ''
 
                 };
             } catch {

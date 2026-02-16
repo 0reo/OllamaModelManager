@@ -221,7 +221,7 @@
                                id="${model.name}" 
                                onchange="toggleModel('${model.name}')">
                     </div>
-                    <div class="name-col">${model.name}</div>
+                    <div class="name-col">${model.name.replace('/', '/<wbr />')}</div>
                     <div class="size-col">${formatSize(model.size)}</div>
                     <div class="param-col">${model.details?.parameter_size || ''}</div>
                     <div class="family-col">${model.details?.family || ''}</div>

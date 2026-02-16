@@ -255,7 +255,7 @@ h2 {
 }
 
 .checkbox-col {
-    width: 24px;
+    flex: 0 0 40px;
 }
 
 .checkbox-col input[type="checkbox"] {
@@ -288,22 +288,22 @@ h2 {
     transform: rotate(45deg);
 }
 
-.name-col { flex: 2; min-width: 150px; }
-.size-col { width: 100px; }
-.param-col { width: 80px; }
-.family-col { width: 100px; }
-.format-col { width: 80px; }
-.quant-col { width: 100px; }
+.name-col { flex: 2; }
+.size-col { flex: 1; }
+.param-col { flex: 0.8 }
+.family-col { flex: 1; }
+.format-col { flex: 0.8 }
+.quant-col { flex: 1; }
 
 .actions-col {
-    flex: 0.8;
+    flex: 1.2;
     text-align: center;
 }
 
 .action-buttons {
     display: flex;
     gap: 8px;
-    justify-content: center;
+    /* justify-content: center; */
 }
 
 .action-buttons button {
@@ -368,7 +368,7 @@ button:disabled {
 }
 
 .filter-input {
-    width: 100%;
+    width: calc(100% - 32px);
     padding: 12px 16px;
     background-color: var(--input-bg);
     color: var(--input-text);

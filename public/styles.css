@@ -292,7 +292,7 @@ h2 {
 .size-col { flex: 1; }
 .param-col { flex: 0.8 }
 .family-col { flex: 1; }
-.format-col { flex: 0.8 }
+.capabilities-col { flex: 0.8 }
 .quant-col { flex: 1; }
 
 .actions-col {

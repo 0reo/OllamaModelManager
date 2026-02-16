@@ -57,7 +57,7 @@
                     <div class="size-col sort-indicator" onclick="sortModels('size')">Size</div>
                     <div class="param-col sort-indicator" onclick="sortModels('parameter_size')">Params</div>
                     <div class="family-col sort-indicator" onclick="sortModels('family')">Family</div>
-                    <div class="format-col sort-indicator" onclick="sortModels('format')">Format</div>
+                    <div class="capabilities-col sort-indicator" onclick="sortModels('capabilities')">Capabilities</div>
                     <div class="quant-col sort-indicator" onclick="sortModels('quantization_level')">Q-Level</div>
                     <div class="actions-col">Actions</div>
                 </div>
@@ -205,9 +205,11 @@
             const sortedModels = [...models].sort((a, b) => {
                 let valueA = currentSort.field === 'name' ? a[currentSort.field] : 
                             currentSort.field === 'size' ? a[currentSort.field] :
+                            currentSort.field === 'capabilities' ? a.capabilities:
                             a.details?.[currentSort.field];
                 let valueB = currentSort.field === 'name' ? b[currentSort.field] :
                             currentSort.field === 'size' ? b[currentSort.field] :
+                            currentSort.field === 'capabilities' ? b.capabilities:
                             b.details?.[currentSort.field];
 
                 const comparison = compareValues(valueA, valueB, currentSort.field);
@@ -225,12 +227,12 @@
                     <div class="size-col">${formatSize(model.size)}</div>
                     <div class="param-col">${model.details?.parameter_size || ''}</div>
                     <div class="family-col">${model.details?.family || ''}</div>
-                    <div class="format-col">${model.details?.format || ''}</div>
+                    <div class="capabilities-col">${model.capabilities?.join(', ') || ''}</div>
                     <div class="quant-col">${model.details?.quantization_level || ''}</div>
                     <div class="actions-col">
                         <div class="action-buttons">
-                            <button class="update-btn" onclick="updateModel('${model.name}')">Update</button>
-                            <button class="delete-btn" onclick="deleteModel('${model.name}')">Delete</button>
+                            <button class="update-btn" onclick="updateModel('${model.name}')">U</button>
+                            <button class="delete-btn" onclick="deleteModel('${model.name}')">D</button>
                         </div>
                         <div id="status-${model.name}" class="update-status"></div>
                     </div>
@@ -482,8 +484,8 @@
                             <span class="stat-value">${model.details?.parameter_size || 'N/A'}</span>
                         </div>
                         <div class="model-stat">
-                            <span class="stat-label">Format:</span>
-                            <span class="stat-value">${model.details?.format || 'N/A'}</span>
+                            <span class="stat-label">Capabilities:</span>
+                            <span class="stat-value">${model.capabilities?.join(", ") || 'N/A'}</span>
                         </div>
                         <div class="model-stat">
                             <span class="stat-label">Quantization:</span>

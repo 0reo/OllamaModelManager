@@ -64,7 +64,24 @@ app.post('/api/set-endpoint', async (req, res) => {
 app.get('/api/ps', async (req, res) => {
     try {
         const response = await axios.get(`${ollamaEndpoint}/api/ps`);
-        res.json(response.data);
+
+        const modelsWithCapabilities = await Promise.all(response.data.models.map(async (model) => {
+            try {
+                const showResponse = await axios.post(`${ollamaEndpoint}/api/show`, {
+                    name: model.name
+                });
+                
+                return {
+                    ...model,
+                    capabilities: showResponse.data.capabilities || ''
+                };
+            } catch {
+                // If we can't get capabilities, return the model without them
+                return model;
+            }
+        }));
+
+        res.json({models:modelsWithCapabilities});
     } catch (error) {
         res.status(500).json({ 
             success: false, 
@@ -92,8 +109,9 @@ app.get('/api/models', async (req, res) => {
                         family: detailsResponse.data.details?.family || '',
                         families: detailsResponse.data.details?.families || [],
                         parameter_size: detailsResponse.data.details?.parameter_size || '',
-                        quantization_level: detailsResponse.data.details?.quantization_level || ''
-                    }
+                        quantization_level: detailsResponse.data.details?.quantization_level || '',
+                    },
+                    capabilities: detailsResponse.data.capabilities || ''
                 };
             } catch {
                 // If we can't get details, return the model without them

@@ -103,15 +103,19 @@ app.get('/api/models', async (req, res) => {
                 });
                 return {
                     ...model,
-                    details: {
-                        parent_model: detailsResponse.data.details?.parent_model || '',
-                        format: detailsResponse.data.details?.format || '',
-                        family: detailsResponse.data.details?.family || '',
-                        families: detailsResponse.data.details?.families || [],
-                        parameter_size: detailsResponse.data.details?.parameter_size || '',
-                        quantization_level: detailsResponse.data.details?.quantization_level || '',
-                    },
-                    capabilities: detailsResponse.data.capabilities || ''
+                    // details: {
+                    //     parent_model: detailsResponse.data.details?.parent_model || '',
+                    //     format: detailsResponse.data.details?.format || '',
+                    //     family: detailsResponse.data.details?.family || '',
+                    //     families: detailsResponse.data.details?.families || [],
+                    //     parameter_size: detailsResponse.data.details?.parameter_size || '',
+                    //     quantization_level: detailsResponse.data.details?.quantization_level || '',
+                    // },
+                    details: detailsResponse.data.details,
+                    capabilities: detailsResponse.data.capabilities || '',
+                    parameters: detailsResponse.data.parameters,
+                    template: detailsResponse.data.template,
+
                 };
             } catch {
                 // If we can't get details, return the model without them

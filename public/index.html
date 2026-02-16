@@ -43,11 +43,16 @@
             </div>
             <h2>Available Models</h2>
             <button onclick="refreshModels()">Refresh Models</button>
-            <button onclick="updateSelectedModels()" id="updateSelectedBtn" disabled>Update Selected</button>
-            <button onclick="deleteSelectedModels()" class="delete-btn">Delete Selected</button>
+            <button onclick="updateSelectedModels(event)" id="updateSelectedBtn" disabled>Update Selected</button>
+            <button onclick="deleteSelectedModels(event)" class="delete-btn">Delete Selected</button>
             <div class="filter-container">
                 <input type="text" id="modelFilter" placeholder="Filter models..." onkeyup="filterModels()" class="filter-input">
             </div>
+
+            <dialog id="model-details">
+                <div id="model-details-wrapper">This dialog shows extended model information.</div>
+                <button commandfor="model-details" command="close">Close</button>
+            </dialog>            
             <div class="models-list" id="modelsList">
                 <div class="models-header">
                     <div class="checkbox-col">
@@ -193,7 +198,8 @@
         function filterModels() {
             const filterValue = document.getElementById('modelFilter').value.toLowerCase();
             const filteredModels = currentModels.filter(model => 
-                model.name.toLowerCase().includes(filterValue)
+                model.name.toLowerCase().includes(filterValue) || 
+                model.capabilities?.toString().toLowerCase().includes(filterValue)
             );
             displayModels(filteredModels);
         }
@@ -217,13 +223,13 @@
             });
 
             modelsListContent.innerHTML = sortedModels.map(model => `
-                <div class="model-item">
+                <div class="model-item" onclick="printModel('${model.name}')">
                     <div class="checkbox-col">
                         <input type="checkbox" 
                                id="${model.name}" 
                                onchange="toggleModel('${model.name}')">
                     </div>
-                    <div class="name-col">${model.name.replace('/', '/<wbr />')}</div>
+                    <div class="name-col">${model.name.replace(/\/(?=[^/]*$)/, '/<wbr />')}</div>
                     <div class="size-col">${formatSize(model.size)}</div>
                     <div class="param-col">${model.details?.parameter_size || ''}</div>
                     <div class="family-col">${model.details?.family || ''}</div>
@@ -231,13 +237,86 @@
                     <div class="quant-col">${model.details?.quantization_level || ''}</div>
                     <div class="actions-col">
                         <div class="action-buttons">
-                            <button class="update-btn" onclick="updateModel('${model.name}')">U</button>
-                            <button class="delete-btn" onclick="deleteModel('${model.name}')">D</button>
+                            <button class="update-btn" onclick="updateModel(event, '${model.name}')">U</button>
+                            <button class="delete-btn" onclick="deleteModel(event, '${model.name}')">D</button>
                         </div>
                         <div id="status-${model.name}" class="update-status"></div>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Usage:
+        // const htmlOutput = formatNestedHtml(filteredModels);
+        // document.getElementById('your-container').innerHTML = htmlOutput;
+        function formatNestedHtml(data, depth = 0) {
+        // 1. Base case: If it's not an object/array, just return the value directly
+        if (typeof data !== 'object' || data === null) {
+            return data;
+        }
+
+        const indent = depth * 20; // Indent 20px per level
+        let html = '';
+
+        // 2. Handle Arrays
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+            html += `<div style="margin-left: ${indent + 10}px; border-left: 2px solid #ddd; padding-left: 8px; margin-bottom: 4px;">`;
+            html += formatNestedHtml(item, depth + 1);
+            html += `</div>`;
+            });
+        } 
+        // 3. Handle Objects
+        else {
+            Object.entries(data).forEach(([key, value]) => {
+
+                
+            // Check if the value is a nested object or array
+            const isComplex = typeof value === 'object' && value !== null;
+            
+            html += `<div style="margin-left: ${indent}px; margin-bottom: 4px;">`;
+            html += `<strong>${key.replace("_", " ")}:</strong>`;
+            switch (key) {
+                case "modified_at":
+                    value = new Date(value).toString()
+                    break;
+            
+                default:
+                    break;
+            }
+            
+            if (isComplex) {
+                // If it's nested, drop to a new line and process the inner data
+                html += `<br>${formatNestedHtml(value, depth + 1)}`;
+            } else {
+                // If it's a simple value, put it on the same line
+                
+                const tag = value.toString().includes(`\n`) ? "pre" :"span"
+                html +=  `<${tag} style="${tag == "pre" && "margin-left:20px"}">${formatNestedHtml(value, depth + 1)}</${tag}>`;
+            }
+            
+            html += `</div>`;
+            });
+        }
+
+        return html;
+        }
+
+
+
+        function printModel(modelName){
+            const dialog = document.querySelector("#model-details");
+
+            const filteredModels = currentModels.find(model => 
+                model.name == modelName
+            );
+            // alert(JSON.stringify(filteredModels, null, 2))
+            // JSON.stringify(filteredModels, null, 2)
+//             Object.entries(filteredModels)
+//   .map(([key, value]) => `${key}: ${value}`)
+//   .join('\n');
+            dialog.querySelector("#model-details-wrapper").innerHTML = formatNestedHtml(filteredModels)
+            dialog.showModal();
         }
 
         async function refreshModels() {
@@ -305,7 +384,7 @@
             }
         }
 
-        async function updateSelectedModels() {
+        async function updateSelectedModels(event) {
             if (selectedModels.size === 0) return;
             
             const models = Array.from(selectedModels);
@@ -315,7 +394,7 @@
                 statusElement.className = 'update-status';
                 const modelRow = document.getElementById(modelName).closest('.model-item');
                 modelRow.querySelector('.actions-col').appendChild(statusElement);
-                return updateModel(modelName);
+                return updateModel(event, modelName);
             });
             
             await Promise.all(updatePromises);
@@ -324,7 +403,9 @@
             refreshModels();
         }
 
-        async function deleteModel(modelName) {
+        async function deleteModel(event, modelName) {
+            event.stopPropagation()
+
             if (!confirm(`Are you sure you want to delete ${modelName}?`)) {
                 return;
             }
@@ -347,7 +428,9 @@
             }
         }
 
-        async function deleteSelectedModels() {
+        async function deleteSelectedModels(event) {
+            event.stopPropagation()
+
             if (selectedModels.size === 0) return;
             
             if (!confirm(`Are you sure you want to delete ${selectedModels.size} model(s)?`)) {
@@ -428,7 +511,11 @@
             }
         }
 
-        async function updateModel(modelName) {
+        async function updateModel(event, modelName) {
+            event.stopPropagation()
+            if (!confirm(`Are you sure you want to update ${modelName}?`)) {
+                return;
+            }            
             const statusElement = document.getElementById(`status-${modelName}`);
             updateStatusElement(statusElement, 'Starting update...');
             

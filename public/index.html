@@ -632,6 +632,42 @@
             }
         }
 
+        // Mirror `ollama ps` PROCESSOR column: derive the CPU/GPU split from how
+        // much of the model is resident in VRAM (size_vram) vs its total size.
+        function formatProcessor(model) {
+            const total = Number(model.size) || 0;
+            if (total === 0) return 'N/A';
+            // Distinguish a genuinely CPU-only model (size_vram === 0) from a
+            // missing/malformed field, so an absent value isn't reported as CPU.
+            if (model.size_vram == null) return 'N/A';
+            const vram = Number(model.size_vram);
+            if (!isFinite(vram)) return 'N/A';
+            if (vram <= 0) return '100% CPU';
+            if (vram >= total) return '100% GPU';
+            const gpu = Math.round((vram / total) * 100);
+            const cpu = 100 - gpu;
+            return `${cpu}%/${gpu}% CPU/GPU`;
+        }
+
+        // The context window the model is loaded with (ollama ps CONTEXT column).
+        function formatContext(n) {
+            const ctx = Number(n);
+            if (!ctx || !isFinite(ctx)) return 'N/A';
+            return ctx.toLocaleString();
+        }
+
+        // `ollama ps` UNTIL column: when the model unloads from memory. A keep_alive
+        // of -1 yields a far-future expiry, which ollama reports as "Forever".
+        function formatUntil(iso) {
+            if (!iso) return 'N/A';
+            const t = new Date(iso).getTime();
+            if (isNaN(t)) return 'N/A';
+            const diffMs = t - Date.now();
+            if (diffMs <= 0) return 'Expiring';
+            if (diffMs / (1000 * 60 * 60 * 24 * 365) > 100) return 'Forever';
+            return `${formatDuration(diffMs / 1000)} from now`;
+        }
+
         async function fetchRunningModels() {
             const runningModelsContent = document.getElementById('runningModelsContent');
             try {
@@ -659,12 +695,18 @@
                 runningModelsContent.replaceChildren(...data.models.map(model => {
                     const card = el('div', 'running-model-item');
                     const capabilities = Array.isArray(model.capabilities) ? model.capabilities.join(', ') : '';
+                    const id = typeof model.digest === 'string' ? model.digest.slice(0, 12) : 'N/A';
+                    // Columns mirror `ollama ps`: name, id, size, processor, context, until.
                     card.append(
                         buildStat('Name:', model.name),
-                        buildStat('Memory:', formatSize(model.size_vram)),
+                        buildStat('ID:', id),
+                        buildStat('Size:', formatSize(model.size) || 'N/A'),
+                        buildStat('Processor:', formatProcessor(model)),
+                        buildStat('Context:', formatContext(model.context_length)),
+                        buildStat('Until:', formatUntil(model.expires_at)),
                         buildStat('Parameters:', model.details?.parameter_size || 'N/A'),
-                        buildStat('Capabilities:', capabilities || 'N/A'),
-                        buildStat('Quantization:', model.details?.quantization_level || 'N/A')
+                        buildStat('Quantization:', model.details?.quantization_level || 'N/A'),
+                        buildStat('Capabilities:', capabilities || 'N/A')
                     );
                     return card;
                 }));

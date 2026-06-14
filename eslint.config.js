@@ -42,4 +42,19 @@ export default [
     // Files to ignore
     ignores: ['node_modules/**', 'build/**', 'dist/**'],
   },
+  {
+    // The service worker runs in a ServiceWorkerGlobalScope, not window.
+    files: ['public/sw.js'],
+    languageOptions: {
+      globals: {
+        self: 'readonly',
+        caches: 'readonly',
+        clients: 'readonly',
+        URL: 'readonly',
+        Promise: 'readonly',
+        Response: 'readonly',
+        Request: 'readonly',
+      },
+    },
+  },
 ];

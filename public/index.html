@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ollama Model Manager</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- PWA: installable app shell -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#1c1c1e">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <script type="module" src="https://cdn.jsdelivr.net/npm/deep-chat@2.4.2/dist/deepChat.bundle.js"
             integrity="sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m"
             crossorigin="anonymous"></script>
+    <script>
+        // Register the service worker so the app is installable and the shell works offline.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch((err) => {
+                    console.error('Service worker registration failed:', err);
+                });
+            });
+        }
+    </script>
 </head>
 <body>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">

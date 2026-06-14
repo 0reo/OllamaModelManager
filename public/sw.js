@@ -4,6 +4,11 @@
 //   - navigations               -> network-first, fall back to the cached app shell offline
 //   - other same-origin assets  -> cache-first + background refresh (stale-while-revalidate)
 //   - cross-origin (e.g. CDN)    -> passed straight through, never cached
+// Bump this version (omm-shell-v2, …) whenever a shell asset (index.html,
+// styles.css, icons) changes shape, so `activate` purges the old cache instead of
+// lazily serving stale copies. Navigations and /api/* are network-first, so the
+// HTML (which holds all app logic inline) and live data always refresh on their
+// own; only static sub-resources like styles.css depend on this version bump.
 const CACHE = 'omm-shell-v1';
 const SHELL = [
     '/',
@@ -63,7 +68,13 @@ self.addEventListener('fetch', (event) => {
                     }
                     return resp;
                 })
-                .catch(() => cached);
+                .catch(() => {
+                    // Offline: serve the cached copy if we have one, otherwise let the
+                    // request fail as a normal network error rather than resolving the
+                    // fetch handler to `undefined` (which browsers treat as a hard error).
+                    if (cached) return cached;
+                    throw new Error('offline and not cached: ' + url.pathname);
+                });
             return cached || network;
         })
     );

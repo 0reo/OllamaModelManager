@@ -49,7 +49,6 @@ export default [
       globals: {
         self: 'readonly',
         caches: 'readonly',
-        clients: 'readonly',
         URL: 'readonly',
         Promise: 'readonly',
         Response: 'readonly',

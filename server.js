@@ -6,6 +6,14 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 const app = express();
 
+// Behind a reverse proxy (e.g. Caddy terminating TLS for a subdomain), trust the
+// first hop so req.protocol / req.secure / req.ip reflect the X-Forwarded-* headers
+// rather than the proxy's own connection. This presumes the app is reached ONLY via
+// the trusted proxy; with HOST=0.0.0.0 it is also directly reachable, so any future
+// IP-based logic (rate-limit, audit log, allow-list) must account for a spoofable
+// X-Forwarded-For sent by a direct client.
+app.set('trust proxy', 1);
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
@@ -346,6 +354,20 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Bind all interfaces by default so a reverse proxy (possibly running in a
+// container or on another host) can reach the app; override with HOST to restrict it.
+const HOST = process.env.HOST || '0.0.0.0';
+const server = app.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT} (bound ${HOST}:${PORT})`);
+});
+// Surface bind failures as one actionable line instead of an uncaught stack trace.
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} on ${HOST} is already in use — set a different PORT or stop the other instance.`);
+    } else if (err.code === 'EADDRNOTAVAIL') {
+        console.error(`Cannot bind HOST=${HOST}: no local interface has that address — check the HOST env var.`);
+    } else {
+        console.error(`Server failed to start on ${HOST}:${PORT}:`, err.message);
+    }
+    process.exit(1);
 });

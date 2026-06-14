@@ -134,6 +134,35 @@ The application will be available at `http://localhost:3000`
 - `OLLAMA_ENDPOINTS`: Comma-separated list of Ollama API endpoints (required)
   - Format: `http://host1:port,http://host2:port`
   - Example: `http://192.168.1.10:11434,https://ollama1.remote.net`
+- `PORT`: Port to listen on (default `3000`).
+- `HOST`: Interface to bind (default `0.0.0.0`, i.e. all interfaces). Leave as the
+  default when fronting the app with a reverse proxy.
+
+## Running behind a reverse proxy (custom domain / HTTPS)
+
+The app is reverse-proxy ready, so you can serve it at a custom domain with no
+port in the URL (e.g. `https://ollama.example.com`) behind any TLS-terminating
+reverse proxy (Caddy, nginx, Traefik, …):
+
+- It sets `trust proxy`, so it honours `X-Forwarded-Proto`/`-Host` from the proxy.
+- Client requests use **relative** URLs, so it works under any hostname, not just
+  `localhost`.
+- It binds all interfaces by default (`HOST=0.0.0.0`) so the proxy can reach it;
+  point the proxy's `reverse_proxy` / `proxy_pass` target at the app's `HOST:PORT`
+  (default `:3000`).
+
+Then add a DNS record for your chosen hostname and a vhost in your proxy that
+terminates TLS and forwards to the app. Example (Caddy):
+
+```caddyfile
+ollama.example.com {
+    reverse_proxy <app-host>:3000
+}
+```
+
+> To install the app as a PWA later, the origin must use a **browser-trusted**
+> certificate (e.g. Let's Encrypt) — a self-signed / internal-CA cert will block
+> service-worker registration.
 
 ## Development
 

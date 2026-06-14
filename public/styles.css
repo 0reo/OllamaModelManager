@@ -497,6 +497,17 @@ div#model-details-wrapper pre
     border-radius: 8px;
 }
 
+/* Nested model-detail rows (built as DOM nodes, not innerHTML, for XSS safety) */
+.nested-row {
+    margin-bottom: 4px;
+}
+
+.nested-array-item {
+    border-left: 2px solid var(--border-color);
+    padding-left: 8px;
+    margin-bottom: 4px;
+}
+
 .tags {
     flex-basis: 100%;
 }

@@ -110,12 +110,16 @@
                 
                 // Get last used endpoint from localStorage or use first endpoint
                 const lastEndpoint = localStorage.getItem('lastEndpoint') || endpoints[0];
-                
-                select.innerHTML = endpoints.map(endpoint => 
-                    `<option value="${endpoint}" ${endpoint === lastEndpoint ? 'selected' : ''}>
-                        ${endpoint}
-                    </option>`
-                ).join('');
+
+                // Build options via createElement (value/textContent) — never innerHTML — so an
+                // endpoint string can't inject markup.
+                select.replaceChildren(...endpoints.map(endpoint => {
+                    const opt = document.createElement('option');
+                    opt.value = endpoint;
+                    opt.textContent = endpoint;
+                    if (endpoint === lastEndpoint) opt.selected = true;
+                    return opt;
+                }));
 
                 // Connect to the selected endpoint
                 if (lastEndpoint) {
@@ -124,7 +128,10 @@
             } catch (error) {
                 console.error('Failed to load endpoints:', error);
                 const select = document.getElementById('endpointInput');
-                select.innerHTML = '<option value="">Failed to load endpoints</option>';
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'Failed to load endpoints';
+                select.replaceChildren(opt);
             }
         }
 
@@ -216,12 +223,102 @@
             displayModels(filteredModels);
         }
 
+        // ---- Safe DOM helpers (avoid innerHTML so crafted model metadata can't inject markup/JS) ----
+        function el(tag, className) {
+            const node = document.createElement(tag);
+            if (className) node.className = className;
+            return node;
+        }
+
+        // Build a model-name node that line-breaks before the final path segment — the same
+        // intent as the old `name.replace(/\/(?=[^/]*$)/, '/<wbr />')` but via real text nodes
+        // and a <wbr> element, so a name like `evil"><img onerror=...>` stays inert text.
+        function buildNameNode(name) {
+            const frag = document.createDocumentFragment();
+            const lastSlash = name.lastIndexOf('/');
+            if (lastSlash !== -1) {
+                frag.appendChild(document.createTextNode(name.slice(0, lastSlash + 1)));
+                frag.appendChild(document.createElement('wbr'));
+                frag.appendChild(document.createTextNode(name.slice(lastSlash + 1)));
+            } else {
+                frag.appendChild(document.createTextNode(name));
+            }
+            return frag;
+        }
+
+        // A labeled table cell. The data-label drives the per-model card layout on mobile
+        // (CSS renders it via ::before). Empty optional cells are flagged so they collapse on mobile.
+        function labeledCell(className, label, text) {
+            const cell = el('div', className);
+            cell.setAttribute('data-label', label);
+            const value = text == null ? '' : String(text);
+            cell.textContent = value;
+            if (!value) cell.classList.add('is-empty');
+            return cell;
+        }
+
+        function buildModelRow(model) {
+            const row = el('div', 'model-item');
+            row.addEventListener('click', () => printModel(model));
+
+            const checkboxCol = el('div', 'checkbox-col');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = model.name; // property assignment — never parsed as HTML
+            checkbox.addEventListener('change', () => toggleModel(model.name));
+            // Toggling selection shouldn't also open the details dialog.
+            checkbox.addEventListener('click', (e) => e.stopPropagation());
+            checkboxCol.appendChild(checkbox);
+
+            const nameCol = el('div', 'name-col');
+            nameCol.setAttribute('data-label', 'Name');
+            nameCol.appendChild(buildNameNode(model.name));
+
+            const capabilities = Array.isArray(model.capabilities) ? model.capabilities.join(', ') : '';
+
+            const actionsCol = el('div', 'actions-col');
+            actionsCol.setAttribute('data-label', 'Actions');
+            const actionButtons = el('div', 'action-buttons');
+            const updateBtn = el('button', 'update-btn');
+            updateBtn.type = 'button';
+            updateBtn.textContent = 'U';
+            updateBtn.title = 'Update model';
+            updateBtn.addEventListener('click', (e) => updateModel(e, model.name));
+            const deleteBtn = el('button', 'delete-btn');
+            deleteBtn.type = 'button';
+            deleteBtn.textContent = 'D';
+            deleteBtn.title = 'Delete model';
+            deleteBtn.addEventListener('click', (e) => deleteModel(e, model.name));
+            actionButtons.append(updateBtn, deleteBtn);
+            const statusEl = el('div', 'update-status');
+            statusEl.id = `status-${model.name}`;
+            actionsCol.append(actionButtons, statusEl);
+
+            const tagsValue = Array.isArray(model.tags) ? model.tags.join(', ') : (model.tags || '');
+            const tags = el('div', 'tags');
+            tags.id = `tags-${model.name}`;
+            if (tagsValue) tags.textContent = 'Tags: ' + tagsValue;
+
+            row.append(
+                checkboxCol,
+                nameCol,
+                labeledCell('size-col', 'Size', formatSize(model.size)),
+                labeledCell('param-col', 'Params', model.details?.parameter_size || ''),
+                labeledCell('family-col', 'Family', model.details?.family || ''),
+                labeledCell('capabilities-col', 'Capabilities', capabilities),
+                labeledCell('quant-col', 'Q-Level', model.details?.quantization_level || ''),
+                actionsCol,
+                tags
+            );
+            return row;
+        }
+
         function displayModels(models) {
             const modelsListContent = document.getElementById('modelsListContent');
-            
+
             // Sort models
             const sortedModels = [...models].sort((a, b) => {
-                let valueA = currentSort.field === 'name' ? a[currentSort.field] : 
+                let valueA = currentSort.field === 'name' ? a[currentSort.field] :
                             currentSort.field === 'size' ? a[currentSort.field] :
                             currentSort.field === 'capabilities' ? a.capabilities:
                             a.details?.[currentSort.field];
@@ -234,109 +331,61 @@
                 return currentSort.direction === 'asc' ? comparison : -comparison;
             });
 
-            modelsListContent.innerHTML = sortedModels.map(model => {
-                const paramSize = model.details?.parameter_size || '';
-                const family = model.details?.family || '';
-                const capabilities = model.capabilities?.join(', ') || '';
-                const quant = model.details?.quantization_level || '';
-                // data-label drives the per-model card layout on mobile (CSS ::before); empty
-                // optional cells are flagged is-empty so they collapse on narrow screens.
-                return `
-                <div class="model-item" onclick="printModel('${model.name}')">
-                    <div class="checkbox-col">
-                        <input type="checkbox"
-                               id="${model.name}"
-                               onchange="toggleModel('${model.name}')">
-                    </div>
-                    <div class="name-col" data-label="Name">${model.name.replace(/\/(?=[^/]*$)/, '/<wbr />')}</div>
-                    <div class="size-col" data-label="Size">${formatSize(model.size)}</div>
-                    <div class="param-col${paramSize ? '' : ' is-empty'}" data-label="Params">${paramSize}</div>
-                    <div class="family-col${family ? '' : ' is-empty'}" data-label="Family">${family}</div>
-                    <div class="capabilities-col${capabilities ? '' : ' is-empty'}" data-label="Capabilities">${capabilities}</div>
-                    <div class="quant-col${quant ? '' : ' is-empty'}" data-label="Q-Level">${quant}</div>
-                    <div class="actions-col" data-label="Actions">
-                        <div class="action-buttons">
-                            <button class="update-btn" onclick="updateModel(event, '${model.name}')">U</button>
-                            <button class="delete-btn" onclick="deleteModel(event, '${model.name}')">D</button>
-                        </div>
-                        <div id="status-${model.name}" class="update-status"></div>
-                    </div>
-                    <div class="tags" id="tags-${model.name}">${model.tags && "Tags: "+model.tags}</div>
-                </div>
-            `;
-            }).join('');
+            modelsListContent.replaceChildren(...sortedModels.map(buildModelRow));
         }
 
-        // Usage:
-        // const htmlOutput = formatNestedHtml(filteredModels);
-        // document.getElementById('your-container').innerHTML = htmlOutput;
-        function formatNestedHtml(data, depth = 0) {
-        // 1. Base case: If it's not an object/array, just return the value directly
-        if (typeof data !== 'object' || data === null) {
-            return data;
-        }
+        // Render an arbitrary nested object (model details) into the dialog as real DOM nodes.
+        // Indentation is derived from depth (a number we control) — never from untrusted data —
+        // and every key/value is set via textContent, so model metadata cannot inject markup.
+        function buildNestedNodes(data, depth = 0) {
+            const frag = document.createDocumentFragment();
 
-        const indent = depth * 20; // Indent 20px per level
-        let html = '';
+            if (typeof data !== 'object' || data === null) {
+                frag.appendChild(document.createTextNode(data == null ? '' : String(data)));
+                return frag;
+            }
 
-        // 2. Handle Arrays
-        if (Array.isArray(data)) {
-            data.forEach(item => {
-            html += `<div style="margin-left: ${indent + 10}px; border-left: 2px solid #ddd; padding-left: 8px; margin-bottom: 4px;">`;
-            html += formatNestedHtml(item, depth + 1);
-            html += `</div>`;
-            });
-        } 
-        // 3. Handle Objects
-        else {
+            if (Array.isArray(data)) {
+                data.forEach(item => {
+                    const wrap = el('div', 'nested-array-item');
+                    wrap.style.marginLeft = (depth * 20 + 10) + 'px';
+                    wrap.appendChild(buildNestedNodes(item, depth + 1));
+                    frag.appendChild(wrap);
+                });
+                return frag;
+            }
+
             Object.entries(data).forEach(([key, value]) => {
+                const isComplex = typeof value === 'object' && value !== null;
+                const rowEl = el('div', 'nested-row');
+                rowEl.style.marginLeft = (depth * 20) + 'px';
 
-                
-            // Check if the value is a nested object or array
-            const isComplex = typeof value === 'object' && value !== null;
-            
-            html += `<div style="margin-left: ${indent}px; margin-bottom: 4px;">`;
-            html += `<strong>${key.replace("_", " ")}:</strong>`;
-            switch (key) {
-                case "modified_at":
-                    value = new Date(value).toString()
-                    break;
-            
-                default:
-                    break;
-            }
-            
-            if (isComplex) {
-                // If it's nested, drop to a new line and process the inner data
-                html += `<br>${formatNestedHtml(value, depth + 1)}`;
-            } else {
-                // If it's a simple value, put it on the same line
-                
-                const tag = value && value.toString().includes(`\n`) ? "pre" :"span"
-                html +=  `<${tag} style="${tag == "pre" && "margin-left:20px"}">${formatNestedHtml(value, depth + 1)}</${tag}>`;
-            }
-            
-            html += `</div>`;
+                const strong = document.createElement('strong');
+                strong.textContent = key.replaceAll('_', ' ') + ':';
+                rowEl.appendChild(strong);
+
+                let displayValue = value;
+                if (key === 'modified_at') displayValue = new Date(value).toString();
+
+                if (isComplex) {
+                    rowEl.appendChild(document.createElement('br'));
+                    rowEl.appendChild(buildNestedNodes(displayValue, depth + 1));
+                } else {
+                    const isPre = displayValue != null && String(displayValue).includes('\n');
+                    const valueEl = document.createElement(isPre ? 'pre' : 'span');
+                    if (isPre) valueEl.style.marginLeft = '20px';
+                    valueEl.textContent = displayValue == null ? '' : String(displayValue);
+                    rowEl.appendChild(valueEl);
+                }
+                frag.appendChild(rowEl);
             });
+            return frag;
         }
 
-        return html;
-        }
-
-
-
-        function printModel(modelName){
-            const dialog = document.querySelector("#model-details");
-
-            const filteredModels = currentModels.find(model => 
-                model.name == modelName
-            );
-            // alert(JSON.stringify(filteredModels, null, 2))
-            // JSON.stringify(filteredModels, null, 2)
-//             Object.entries(filteredModels)
-//   .map(([key, value]) => `${key}: ${value}`)
-//   .join('\n');
-            dialog.querySelector("#model-details-wrapper").innerHTML = formatNestedHtml(filteredModels)
+        function printModel(model) {
+            const dialog = document.querySelector('#model-details');
+            const wrapper = dialog.querySelector('#model-details-wrapper');
+            wrapper.replaceChildren(buildNestedNodes(model));
             dialog.showModal();
         }
 
@@ -359,7 +408,9 @@
                 displayModels(models);
                 populateChatModels();
             } catch (error) {
-                modelsList.innerHTML = `<div class="error">Failed to fetch models: ${error.message}</div>`;
+                const errEl = el('div', 'error');
+                errEl.textContent = `Failed to fetch models: ${error.message}`;
+                document.getElementById('modelsListContent').replaceChildren(errEl);
             }
         }
 
@@ -574,37 +625,40 @@
                 const data = await response.json();
                 
                 if (!data.models || data.models.length === 0) {
-                    runningModelsContent.innerHTML = '<div class="running-model-item">No models currently running</div>';
+                    const empty = el('div', 'running-model-item');
+                    empty.textContent = 'No models currently running';
+                    runningModelsContent.replaceChildren(empty);
                     return;
                 }
 
-                runningModelsContent.innerHTML = data.models.map(model => `
-                    <div class="running-model-item">
-                        <div class="model-stat">
-                            <span class="stat-label">Name:</span>
-                            <span class="stat-value">${model.name}</span>
-                        </div>
-                        <div class="model-stat">
-                            <span class="stat-label">Memory:</span>
-                            <span class="stat-value">${formatSize(model.size_vram)}</span>
-                        </div>
-                        <div class="model-stat">
-                            <span class="stat-label">Parameters:</span>
-                            <span class="stat-value">${model.details?.parameter_size || 'N/A'}</span>
-                        </div>
-                        <div class="model-stat">
-                            <span class="stat-label">Capabilities:</span>
-                            <span class="stat-value">${model.capabilities?.join(", ") || 'N/A'}</span>
-                        </div>
-                        <div class="model-stat">
-                            <span class="stat-label">Quantization:</span>
-                            <span class="stat-value">${model.details?.quantization_level || 'N/A'}</span>
-                        </div>
-                    </div>
-                `).join('');
+                // Build each running-model card with textContent — model.name and friends are
+                // metadata and must not be interpolated into innerHTML.
+                const buildStat = (label, value) => {
+                    const stat = el('div', 'model-stat');
+                    const l = el('span', 'stat-label');
+                    l.textContent = label;
+                    const v = el('span', 'stat-value');
+                    v.textContent = value;
+                    stat.append(l, v);
+                    return stat;
+                };
+                runningModelsContent.replaceChildren(...data.models.map(model => {
+                    const card = el('div', 'running-model-item');
+                    const capabilities = Array.isArray(model.capabilities) ? model.capabilities.join(', ') : '';
+                    card.append(
+                        buildStat('Name:', model.name),
+                        buildStat('Memory:', formatSize(model.size_vram)),
+                        buildStat('Parameters:', model.details?.parameter_size || 'N/A'),
+                        buildStat('Capabilities:', capabilities || 'N/A'),
+                        buildStat('Quantization:', model.details?.quantization_level || 'N/A')
+                    );
+                    return card;
+                }));
             } catch (error) {
                 console.error('Failed to fetch running models:', error);
-                runningModelsContent.innerHTML = '<div class="running-model-item error">Failed to fetch running models</div>';
+                const errEl = el('div', 'running-model-item error');
+                errEl.textContent = 'Failed to fetch running models';
+                runningModelsContent.replaceChildren(errEl);
             }
         }
 

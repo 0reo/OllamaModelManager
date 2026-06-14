@@ -128,3 +128,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# graphify knowledge-graph output (generated, regenerable from source)
+graphify-out/

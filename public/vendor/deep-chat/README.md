@@ -24,8 +24,11 @@ cp package/dist/deepChat.bundle.js <repo>/public/vendor/deep-chat/deepChat.bundl
 echo "sha384-$(openssl dgst -sha384 -binary package/dist/deepChat.bundle.js | openssl base64 -A)"
 ```
 
-Then in `public/index.html` update **both** the pinned version in the comment and
-the `integrity="sha384-…"` value to the hash printed above.
+Then edit `public/index.html` and update **all three** spots:
+
+1. the version number in the `<!-- Deep Chat <version> vendored locally … -->` comment,
+2. the `integrity="sha384-…"` value → the hash printed above,
+3. and update the **Pinned version** / **SRI integrity** lines in this README.
 
 > Sanity check: the hash you compute from `npm pack` must match the `integrity`
 > you put in the HTML, or the browser will refuse to load the bundle (and chat

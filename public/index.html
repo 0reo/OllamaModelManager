@@ -47,11 +47,25 @@
         </div>
 
         <div class="models-section">
-            <div class="model-pull-container" style="margin-bottom: 24px;">
-                <input type="text" id="modelPullInput" placeholder="Enter model name to pull..." class="filter-input" style="width: auto; margin-right: 12px; display: inline-block;">
-                <button onclick="pullModel()" class="pull-btn">Pull Model</button>
-                <div id="pullStatus" style="margin-top: 12px;"></div>
-                <div id="pullProgressText" class="progress-text" style="display: none;"></div>
+            <div class="model-pull-container">
+                <div class="model-pull-row">
+                    <input type="text" id="modelPullInput" placeholder="Enter model name to pull..." class="filter-input">
+                    <button onclick="pullModel()" class="pull-btn">Pull Model</button>
+                </div>
+                <div id="pullStatus" class="pull-status"></div>
+                <div id="pullProgress" class="pull-progress" hidden>
+                    <div class="pull-progress-head">
+                        <span id="pullProgressStatus" class="pull-progress-status"></span>
+                        <span id="pullProgressPct" class="pull-progress-pct"></span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="pullProgressFill" class="progress-fill"></div>
+                    </div>
+                    <div class="pull-progress-foot">
+                        <span id="pullProgressMeta" class="pull-progress-meta"></span>
+                        <button type="button" id="pullCancelBtn" class="pull-cancel-btn">Cancel</button>
+                    </div>
+                </div>
             </div>
             <h2>Available Models</h2>
             <button onclick="refreshModels()">Refresh Models</button>
@@ -600,90 +614,151 @@
             }
         }
 
+        let pullController = null;
+
+        function formatDuration(seconds) {
+            if (!isFinite(seconds) || seconds < 0) return '—';
+            const s = Math.round(seconds);
+            if (s < 60) return `${s}s`;
+            const m = Math.floor(s / 60);
+            if (m < 60) return `${m}m ${s % 60}s`;
+            const h = Math.floor(m / 60);
+            return `${h}h ${m % 60}m`;
+        }
+
+        // Progress-bar helpers. The fill is "indeterminate" (animated stripe) during stages with
+        // no byte counts (pulling manifest, verifying), and a real width % once we have totals.
+        function setPullProgress(pct) {
+            const fill = document.getElementById('pullProgressFill');
+            fill.classList.remove('indeterminate');
+            fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
+            document.getElementById('pullProgressPct').textContent = pct.toFixed(1) + '%';
+        }
+        function setPullIndeterminate() {
+            const fill = document.getElementById('pullProgressFill');
+            fill.classList.add('indeterminate');
+            fill.style.width = '100%';
+            document.getElementById('pullProgressPct').textContent = '';
+            document.getElementById('pullProgressMeta').textContent = '';
+        }
+
         async function pullModel() {
             const modelName = document.getElementById('modelPullInput').value.trim();
+            const statusElement = document.getElementById('pullStatus');
             if (!modelName) {
-                alert('Please enter a model name');
+                statusElement.className = 'pull-status error';
+                statusElement.textContent = 'Please enter a model name to pull.';
+                setTimeout(() => { statusElement.textContent = ''; statusElement.className = 'pull-status'; }, 4000);
                 return;
             }
 
-            const statusElement = document.getElementById('pullStatus');
-            const progressText = document.getElementById('pullProgressText');
-            
-            statusElement.className = '';
-            statusElement.textContent = 'Starting pull...';
-            progressText.style.display = 'none';
+            const progress = document.getElementById('pullProgress');
+            const progressStatus = document.getElementById('pullProgressStatus');
+            const progressMeta = document.getElementById('pullProgressMeta');
+            const cancelBtn = document.getElementById('pullCancelBtn');
+
+            statusElement.className = 'pull-status';
+            statusElement.textContent = '';
+            progress.hidden = false;
+            progressStatus.textContent = 'Starting pull…';
+            setPullIndeterminate();
+
+            // Track bytes per layer digest so the bar reflects overall progress across all layers,
+            // not just the layer currently downloading.
+            const layers = new Map(); // digest -> { total, completed }
+            const startTime = performance.now();
+
+            pullController = new AbortController();
+            cancelBtn.disabled = false;
+            cancelBtn.onclick = () => pullController?.abort();
 
             try {
                 const response = await fetch('/api/pull', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ model: modelName })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: modelName }),
+                    signal: pullController.signal
                 });
 
                 if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || 'Failed to start pull');
+                    let message = 'Failed to start pull';
+                    try { message = (await response.json()).message || message; } catch { /* non-JSON */ }
+                    throw new Error(message);
                 }
 
                 const reader = response.body.getReader();
-                let lastStatus = '';
+                const decoder = new TextDecoder();
+                let buffer = '';
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
 
-                    const text = new TextDecoder().decode(value);
-                    const lines = text.split('\n');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // keep any partial trailing line
 
                     for (const line of lines) {
-                        if (line.trim()) {
-                            try {
-                                const update = JSON.parse(line);
+                        if (!line.trim()) continue;
+                        let update;
+                        try { update = JSON.parse(line); } catch { continue; }
 
-                                if (update.status === 'error') {
-                                    throw new Error(update.error || 'Pull failed');
-                                }
+                        if (update.status === 'error') {
+                            throw new Error(update.error || 'Pull failed');
+                        }
 
-                                if (update.status === 'downloading') {
-                                    progressText.style.display = 'block';
-                                    progressText.textContent = `Downloading: ${formatSize(update.completed)} / ${formatSize(update.total)}`;
-                                    statusElement.textContent = update.status;
-                                    statusElement.className = 'success';
-                                } else if (update.status !== lastStatus) {
-                                    statusElement.textContent = update.status;
-                                    statusElement.className = 'success';
-                                    lastStatus = update.status;
-                                }
-                            } catch (e) {
-                                if (e.message === 'Pull failed') {
-                                    throw e;
-                                }
-                                console.error('Error parsing update:', e);
+                        progressStatus.textContent = update.status || 'Working…';
+
+                        if (update.digest && typeof update.total === 'number') {
+                            layers.set(update.digest, { total: update.total, completed: update.completed || 0 });
+
+                            let totalBytes = 0, completedBytes = 0;
+                            for (const layer of layers.values()) {
+                                totalBytes += layer.total;
+                                completedBytes += layer.completed;
                             }
+                            const pct = totalBytes ? (completedBytes / totalBytes) * 100 : 0;
+                            setPullProgress(pct);
+
+                            const elapsed = (performance.now() - startTime) / 1000;
+                            const speed = elapsed > 0 ? completedBytes / elapsed : 0;
+                            const eta = speed > 0 ? (totalBytes - completedBytes) / speed : Infinity;
+                            progressMeta.textContent =
+                                `${formatSize(completedBytes)} / ${formatSize(totalBytes)}` +
+                                (speed > 0 ? ` · ${formatSize(speed)}/s · ETA ${formatDuration(eta)}` : '');
+                        } else {
+                            // Non-byte stage (manifest, verifying, writing) — show animated indeterminate.
+                            setPullIndeterminate();
                         }
                     }
                 }
 
-                progressText.style.display = 'none';
-                statusElement.textContent = 'Pull complete';
-                statusElement.className = 'success';
+                setPullProgress(100);
+                progressStatus.textContent = 'Pull complete';
+                statusElement.className = 'pull-status success';
+                statusElement.textContent = `Pulled ${modelName} successfully.`;
                 setTimeout(() => {
+                    progress.hidden = true;
                     statusElement.textContent = '';
+                    statusElement.className = 'pull-status';
                     document.getElementById('modelPullInput').value = '';
                     refreshModels();
-                }, 2000);
+                }, 1800);
 
             } catch (error) {
-                console.error('Pull error:', error);
-                progressText.style.display = 'none';
-                statusElement.textContent = `Error: ${error.message}`;
-                statusElement.className = 'error';
-                setTimeout(() => {
-                    statusElement.textContent = '';
-                }, 5000);
+                progress.hidden = true;
+                if (error.name === 'AbortError') {
+                    statusElement.className = 'pull-status';
+                    statusElement.textContent = 'Pull cancelled.';
+                } else {
+                    console.error('Pull error:', error);
+                    statusElement.className = 'pull-status error';
+                    statusElement.textContent = `Error: ${error.message}`;
+                }
+                setTimeout(() => { statusElement.textContent = ''; statusElement.className = 'pull-status'; }, 5000);
+            } finally {
+                pullController = null;
+                cancelBtn.onclick = null;
             }
         }
 

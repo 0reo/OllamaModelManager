@@ -177,26 +177,35 @@ const handleModelOperation = async (req, res, operation) => {
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Transfer-Encoding', 'chunked');
 
+    // AbortController lets a client disconnect (e.g. the user clicking "Cancel" on a pull)
+    // actually stop the upstream Ollama download instead of leaving it running to completion.
+    const controller = new AbortController();
     let hasEnded = false;
     const endResponse = (error) => {
-        if (!hasEnded) {
-            hasEnded = true;
-            if (error) {
-                res.write(JSON.stringify({
-                    status: 'error',
-                    error: error.message
-                }) + '\n');
-            }
-            res.end();
+        if (hasEnded) return;
+        hasEnded = true;
+        if (error) {
+            try {
+                res.write(JSON.stringify({ status: 'error', error: error.message }) + '\n');
+            } catch { /* socket already gone */ }
         }
+        try { res.end(); } catch { /* socket already gone */ }
     };
+
+    // Detect client disconnect with res 'close' guarded by !writableEnded — NOT req 'close'.
+    // express.json() has already consumed the request body, so req would fire 'close'
+    // immediately and abort the upstream pull before it even starts.
+    res.on('close', () => {
+        if (!res.writableEnded) controller.abort();
+    });
 
     try {
         const response = await axios({
             method: 'post',
             url: `${ollamaEndpoint}/api/pull`,
             data: operation,
-            responseType: 'stream'
+            responseType: 'stream',
+            signal: controller.signal
         });
 
         response.data.on('data', (chunk) => {
@@ -220,13 +229,17 @@ const handleModelOperation = async (req, res, operation) => {
 
         response.data.on('end', () => endResponse());
         response.data.on('error', (error) => {
-            console.error('Stream error:', error);
-            endResponse(error);
+            // A client cancel aborts the upstream stream — that's a clean close, not an error.
+            if (error.code === 'ERR_CANCELED' || error.name === 'AbortError') {
+                endResponse();
+            } else {
+                console.error('Stream error:', error);
+                endResponse(error);
+            }
         });
 
-        req.on('close', () => endResponse());
-
     } catch (error) {
+        if (error.code === 'ERR_CANCELED') { endResponse(); return; }
         console.error('Failed to start operation:', error);
         endResponse(error);
     }

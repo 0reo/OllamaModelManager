@@ -134,6 +134,40 @@ The application will be available at `http://localhost:3000`
 - `OLLAMA_ENDPOINTS`: Comma-separated list of Ollama API endpoints (required)
   - Format: `http://host1:port,http://host2:port`
   - Example: `http://192.168.1.10:11434,https://ollama1.remote.net`
+- `PORT`: Port to listen on (default `3000`).
+- `HOST`: Interface to bind (default `0.0.0.0`, i.e. all interfaces). Leave as the
+  default when fronting the app with a reverse proxy.
+
+## Reaching the app at a subdomain over Tailscale (Caddy)
+
+The app is reverse-proxy ready: it binds all interfaces by default and sets
+`trust proxy`, so it honours `X-Forwarded-Proto`/`-Host` from a TLS-terminating
+proxy, and all client requests use **relative** URLs (so it works under any
+hostname, not just `localhost`). To reach it at a memorable subdomain with no
+port — e.g. `https://ollama.internal.com` — front it with the host's Caddy +
+Headscale setup:
+
+1. **MagicDNS record** (on the Headscale server) so the name resolves on the
+   Tailnet — add under `dns.extra_records` and restart Headscale:
+   ```yaml
+   - { name: "ollama.internal.com", type: "A", value: "10.0.0.1" }
+   ```
+2. **Caddy vhost** (`~/.config/caddy/Caddyfile`) → reverse-proxy to the app on the
+   **Docker bridge gateway** (`172.17.0.1`), not `127.0.0.1`:
+   ```caddyfile
+   ollama.internal.com {
+       tls internal
+       reverse_proxy 172.17.0.1:3000
+   }
+   ```
+3. **Apply:** `docker restart proxy` (a restart re-binds the Caddyfile and
+   provisions certs; a bare `reload` can miss them).
+4. **Verify:** from a Tailnet device, open `https://ollama.internal.com`.
+
+> `tls internal` uses an internal CA, so browsers show a one-time
+> `ERR_CERT_AUTHORITY_INVALID` prompt. For a fully trusted cert (and to host the
+> app as an installable PWA, which requires it), use a public hostname with
+> Let's Encrypt instead.
 
 ## Development
 

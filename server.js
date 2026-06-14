@@ -6,6 +6,11 @@ import { readFile } from 'fs/promises';
 import { join } from 'path';
 const app = express();
 
+// Behind a reverse proxy (e.g. Caddy terminating TLS for a subdomain), trust the
+// first hop so req.protocol / req.secure / req.ip reflect the X-Forwarded-* headers
+// rather than the proxy's own connection. Safe with a single trusted front proxy.
+app.set('trust proxy', 1);
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
@@ -346,6 +351,9 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+// Bind all interfaces by default so a reverse proxy on the Docker bridge
+// (172.17.0.1) can reach the app; override with HOST if you need to restrict it.
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT} (bound ${HOST}:${PORT})`);
 });

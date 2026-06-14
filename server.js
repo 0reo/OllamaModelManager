@@ -266,6 +266,16 @@ app.post('/api/chat', async (req, res) => {
         });
     }
 
+    // Forward only a safe allow-list of inference options. CORS is open ('*'), so an arbitrary
+    // client could otherwise set e.g. num_ctx and OOM the Ollama host.
+    let safeOptions;
+    if (options && typeof options === 'object') {
+        const ALLOWED = ['temperature', 'top_p', 'top_k', 'num_predict', 'repeat_penalty', 'stop', 'seed'];
+        safeOptions = {};
+        for (const k of ALLOWED) if (options[k] !== undefined) safeOptions[k] = options[k];
+        if (Object.keys(safeOptions).length === 0) safeOptions = undefined;
+    }
+
     const controller = new AbortController();
     let hasEnded = false;
     const endResponse = (error) => {
@@ -288,7 +298,7 @@ app.post('/api/chat', async (req, res) => {
         const response = await axios({
             method: 'post',
             url: `${ollamaEndpoint}/api/chat`,
-            data: { model, messages, stream: true, ...(options ? { options } : {}) },
+            data: { model, messages, stream: true, ...(safeOptions ? { options: safeOptions } : {}) },
             responseType: 'stream',
             signal: controller.signal
         });
@@ -298,10 +308,14 @@ app.post('/api/chat', async (req, res) => {
 
         response.data.on('data', (chunk) => res.write(chunk));
         response.data.on('end', () => endResponse());
-        response.data.on('error', (error) => endResponse(error));
+        response.data.on('error', (error) => {
+            // A client disconnect aborts the upstream stream — clean close, not an error to report
+            if (error.code === 'ERR_CANCELED' || error.name === 'AbortError') endResponse();
+            else endResponse(error);
+        });
     } catch (error) {
         if (error.code === 'ERR_CANCELED') return; // client aborted before the stream began
-        console.error('Chat request failed:', error.message);
+        console.error('Chat request failed:', error.code || '', error.message);
         if (!res.headersSent) {
             res.status(502).json({
                 success: false,

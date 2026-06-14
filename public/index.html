@@ -692,8 +692,21 @@
             const select = document.getElementById('chatModelSelect');
             if (!select) return;
             const previous = select.value;
-            select.innerHTML = currentModels.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
-            if (previous && currentModels.some(m => m.name === previous)) {
+            // Only models that can chat/complete (exclude e.g. embedding models). Keep models whose
+            // capability data is unavailable rather than hiding them.
+            const chatModels = currentModels.filter(m =>
+                !m.capabilities || m.capabilities.length === 0 ||
+                m.capabilities.includes('completion') || m.capabilities.includes('chat')
+            );
+            // Build options with createElement + value/textContent (no innerHTML) so a model name
+            // containing HTML/quotes cannot inject markup.
+            select.replaceChildren(...chatModels.map(m => {
+                const opt = document.createElement('option');
+                opt.value = m.name;
+                opt.textContent = m.name;
+                return opt;
+            }));
+            if (previous && chatModels.some(m => m.name === previous)) {
                 select.value = previous;
             }
         }
@@ -735,9 +748,14 @@
                         }
 
                         signals.onOpen();
+                        if (!resp.body) {
+                            signals.onResponse({ error: 'Server returned an empty response stream.' });
+                            return;
+                        }
                         const reader = resp.body.getReader();
                         const decoder = new TextDecoder();
                         let buffer = '';
+                        let gotText = false;
 
                         while (true) {
                             const { done, value } = await reader.read();
@@ -755,9 +773,15 @@
                                     return;
                                 }
                                 if (chunk.message && chunk.message.content) {
+                                    gotText = true;
                                     signals.onResponse({ text: chunk.message.content });
                                 }
                             }
+                        }
+                        // Clean close but no content (model failed to load, empty output, or an
+                        // unparseable line) -> tell the user instead of leaving a blank bubble.
+                        if (!gotText) {
+                            signals.onResponse({ error: 'The model returned no output. It may have failed to load — check the server logs.' });
                         }
                         signals.onClose();
                     } catch (e) {
@@ -781,6 +805,9 @@
             chatEl.submitButtonStyles = {
                 submit: { svg: { styles: { default: { filter: 'brightness(0) saturate(100%) invert(45%) sepia(96%) saturate(1500%) hue-rotate(199deg) brightness(97%) contrast(95%)' } } } }
             };
+
+            // Populate now in case models loaded before deep-chat was defined
+            populateChatModels();
         }
 
         // Initial load

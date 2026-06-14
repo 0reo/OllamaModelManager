@@ -361,7 +361,7 @@
                 rowEl.style.marginLeft = (depth * 20) + 'px';
 
                 const strong = document.createElement('strong');
-                strong.textContent = key.replace('_', ' ') + ':';
+                strong.textContent = key.replaceAll('_', ' ') + ':';
                 rowEl.appendChild(strong);
 
                 let displayValue = value;

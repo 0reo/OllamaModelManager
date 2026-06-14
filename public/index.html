@@ -234,20 +234,27 @@
                 return currentSort.direction === 'asc' ? comparison : -comparison;
             });
 
-            modelsListContent.innerHTML = sortedModels.map(model => `
+            modelsListContent.innerHTML = sortedModels.map(model => {
+                const paramSize = model.details?.parameter_size || '';
+                const family = model.details?.family || '';
+                const capabilities = model.capabilities?.join(', ') || '';
+                const quant = model.details?.quantization_level || '';
+                // data-label drives the per-model card layout on mobile (CSS ::before); empty
+                // optional cells are flagged is-empty so they collapse on narrow screens.
+                return `
                 <div class="model-item" onclick="printModel('${model.name}')">
                     <div class="checkbox-col">
-                        <input type="checkbox" 
-                               id="${model.name}" 
+                        <input type="checkbox"
+                               id="${model.name}"
                                onchange="toggleModel('${model.name}')">
                     </div>
-                    <div class="name-col">${model.name.replace(/\/(?=[^/]*$)/, '/<wbr />')}</div>
-                    <div class="size-col">${formatSize(model.size)}</div>
-                    <div class="param-col">${model.details?.parameter_size || ''}</div>
-                    <div class="family-col">${model.details?.family || ''}</div>
-                    <div class="capabilities-col">${model.capabilities?.join(', ') || ''}</div>
-                    <div class="quant-col">${model.details?.quantization_level || ''}</div>
-                    <div class="actions-col">
+                    <div class="name-col" data-label="Name">${model.name.replace(/\/(?=[^/]*$)/, '/<wbr />')}</div>
+                    <div class="size-col" data-label="Size">${formatSize(model.size)}</div>
+                    <div class="param-col${paramSize ? '' : ' is-empty'}" data-label="Params">${paramSize}</div>
+                    <div class="family-col${family ? '' : ' is-empty'}" data-label="Family">${family}</div>
+                    <div class="capabilities-col${capabilities ? '' : ' is-empty'}" data-label="Capabilities">${capabilities}</div>
+                    <div class="quant-col${quant ? '' : ' is-empty'}" data-label="Q-Level">${quant}</div>
+                    <div class="actions-col" data-label="Actions">
                         <div class="action-buttons">
                             <button class="update-btn" onclick="updateModel(event, '${model.name}')">U</button>
                             <button class="delete-btn" onclick="deleteModel(event, '${model.name}')">D</button>
@@ -256,7 +263,8 @@
                     </div>
                     <div class="tags" id="tags-${model.name}">${model.tags && "Tags: "+model.tags}</div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         // Usage:

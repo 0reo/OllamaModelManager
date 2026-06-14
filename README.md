@@ -138,36 +138,31 @@ The application will be available at `http://localhost:3000`
 - `HOST`: Interface to bind (default `0.0.0.0`, i.e. all interfaces). Leave as the
   default when fronting the app with a reverse proxy.
 
-## Reaching the app at a subdomain over Tailscale (Caddy)
+## Running behind a reverse proxy (custom domain / HTTPS)
 
-The app is reverse-proxy ready: it binds all interfaces by default and sets
-`trust proxy`, so it honours `X-Forwarded-Proto`/`-Host` from a TLS-terminating
-proxy, and all client requests use **relative** URLs (so it works under any
-hostname, not just `localhost`). To reach it at a memorable subdomain with no
-port — e.g. `https://ollama.internal.com` — front it with the host's Caddy +
-Headscale setup:
+The app is reverse-proxy ready, so you can serve it at a custom domain with no
+port in the URL (e.g. `https://ollama.example.com`) behind any TLS-terminating
+reverse proxy (Caddy, nginx, Traefik, …):
 
-1. **MagicDNS record** (on the Headscale server) so the name resolves on the
-   Tailnet — add under `dns.extra_records` and restart Headscale:
-   ```yaml
-   - { name: "ollama.internal.com", type: "A", value: "10.0.0.1" }
-   ```
-2. **Caddy vhost** (`~/.config/caddy/Caddyfile`) → reverse-proxy to the app on the
-   **Docker bridge gateway** (`172.17.0.1`), not `127.0.0.1`:
-   ```caddyfile
-   ollama.internal.com {
-       tls internal
-       reverse_proxy 172.17.0.1:3000
-   }
-   ```
-3. **Apply:** `docker restart proxy` (a restart re-binds the Caddyfile and
-   provisions certs; a bare `reload` can miss them).
-4. **Verify:** from a Tailnet device, open `https://ollama.internal.com`.
+- It sets `trust proxy`, so it honours `X-Forwarded-Proto`/`-Host` from the proxy.
+- Client requests use **relative** URLs, so it works under any hostname, not just
+  `localhost`.
+- It binds all interfaces by default (`HOST=0.0.0.0`) so the proxy can reach it;
+  point the proxy's `reverse_proxy` / `proxy_pass` target at the app's `HOST:PORT`
+  (default `:3000`).
 
-> `tls internal` uses an internal CA, so browsers show a one-time
-> `ERR_CERT_AUTHORITY_INVALID` prompt. For a fully trusted cert (and to host the
-> app as an installable PWA, which requires it), use a public hostname with
-> Let's Encrypt instead.
+Then add a DNS record for your chosen hostname and a vhost in your proxy that
+terminates TLS and forwards to the app. Example (Caddy):
+
+```caddyfile
+ollama.example.com {
+    reverse_proxy <app-host>:3000
+}
+```
+
+> To install the app as a PWA later, the origin must use a **browser-trusted**
+> certificate (e.g. Let's Encrypt) — a self-signed / internal-CA cert will block
+> service-worker registration.
 
 ## Development
 

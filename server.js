@@ -354,8 +354,8 @@ app.post('/api/chat', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-// Bind all interfaces by default so a reverse proxy on the Docker bridge
-// (172.17.0.1) can reach the app; override with HOST if you need to restrict it.
+// Bind all interfaces by default so a reverse proxy (possibly running in a
+// container or on another host) can reach the app; override with HOST to restrict it.
 const HOST = process.env.HOST || '0.0.0.0';
 const server = app.listen(PORT, HOST, () => {
     console.log(`Server running on http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT} (bound ${HOST}:${PORT})`);

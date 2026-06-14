@@ -636,8 +636,12 @@
         // much of the model is resident in VRAM (size_vram) vs its total size.
         function formatProcessor(model) {
             const total = Number(model.size) || 0;
-            const vram = Number(model.size_vram) || 0;
             if (total === 0) return 'N/A';
+            // Distinguish a genuinely CPU-only model (size_vram === 0) from a
+            // missing/malformed field, so an absent value isn't reported as CPU.
+            if (model.size_vram == null) return 'N/A';
+            const vram = Number(model.size_vram);
+            if (!isFinite(vram)) return 'N/A';
             if (vram <= 0) return '100% CPU';
             if (vram >= total) return '100% GPU';
             const gpu = Math.round((vram / total) * 100);

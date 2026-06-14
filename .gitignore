@@ -128,3 +128,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# graphify: commit the persistent graph (graph.json/html, GRAPH_REPORT.md,
+# manifest.json) so it travels with the repo; ignore only the regenerable
+# SHA256 cache and machine-specific internal state (absolute local paths).
+graphify-out/cache/
+graphify-out/.graphify_*

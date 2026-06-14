@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ollama Model Manager</title>
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="https://cdn.jsdelivr.net/npm/deep-chat@2.4.2/dist/deepChat.bundle.js"
-            integrity="sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m"
-            crossorigin="anonymous"></script>
+    <!-- Deep Chat 2.4.2 vendored locally (no runtime CDN dependency) — see public/vendor/deep-chat/README.md to update. -->
+    <script type="module" src="/vendor/deep-chat/deepChat.bundle.js"
+            integrity="sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m"></script>
 </head>
 <body>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">

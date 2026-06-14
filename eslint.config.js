@@ -1,6 +1,9 @@
 import js from '@eslint/js';
 
 export default [
+  // Global ignores (object with only `ignores` applies repo-wide, including
+  // js.configs.recommended). Vendored third-party bundles are not ours to lint.
+  { ignores: ['node_modules/**', 'build/**', 'dist/**', 'public/vendor/**'] },
   js.configs.recommended,
   {
     languageOptions: {

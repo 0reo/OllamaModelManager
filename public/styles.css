@@ -496,3 +496,26 @@ div#model-details-wrapper pre
 .tags {
     flex-basis: 100%;
 }
+
+.chat-section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.chat-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.chat-controls label {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.chat-controls .endpoint-select {
+    flex: 1;
+    max-width: 400px;
+}

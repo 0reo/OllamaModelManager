@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ollama Model Manager</title>
     <link rel="stylesheet" href="styles.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/deep-chat@2.4.2/dist/deepChat.bundle.js"
+            integrity="sha384-ire02ARbuqxh1f0vqLCtjJKh6BVWbziZzoiPht9u+EwKaLagZ6ESBXsXp+A8+x6m"
+            crossorigin="anonymous"></script>
 </head>
 <body>
     <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
@@ -32,6 +35,15 @@
                     <div id="runningModelsContent"></div>
                 </div>
             </div>
+        </div>
+
+        <div class="chat-section">
+            <h2>Chat</h2>
+            <div class="chat-controls">
+                <label for="chatModelSelect">Model:</label>
+                <select id="chatModelSelect" class="endpoint-select"></select>
+            </div>
+            <deep-chat id="chatBox" style="display:block;width:100%;height:460px;border-radius:8px;border:unset;background-color:#1e1e1e"></deep-chat>
         </div>
 
         <div class="models-section">
@@ -337,6 +349,7 @@
                 
                 currentModels = models;
                 displayModels(models);
+                populateChatModels();
             } catch (error) {
                 modelsList.innerHTML = `<div class="error">Failed to fetch models: ${error.message}</div>`;
             }
@@ -674,10 +687,107 @@
             }
         }
 
+        // ---- Chat (Deep Chat web component) ----
+        function populateChatModels() {
+            const select = document.getElementById('chatModelSelect');
+            if (!select) return;
+            const previous = select.value;
+            select.innerHTML = currentModels.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+            if (previous && currentModels.some(m => m.name === previous)) {
+                select.value = previous;
+            }
+        }
+
+        function setupChat() {
+            const chatEl = document.getElementById('chatBox');
+            if (!chatEl) return;
+
+            chatEl.connect = {
+                stream: true,
+                handler: async (body, signals) => {
+                    const model = document.getElementById('chatModelSelect').value;
+                    if (!model) {
+                        signals.onResponse({ error: 'No model selected — pick a model above (connect to an endpoint that has models).' });
+                        return;
+                    }
+                    // Deep Chat messages use { role: 'user' | 'ai', text }; map to Ollama's { role, content }
+                    const messages = (body.messages || []).map(m => ({
+                        role: m.role === 'ai' ? 'assistant' : (m.role || 'user'),
+                        content: m.text || ''
+                    }));
+
+                    const controller = new AbortController();
+                    signals.stopClicked.listener = () => controller.abort();
+
+                    try {
+                        const resp = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ model, messages }),
+                            signal: controller.signal
+                        });
+
+                        if (!resp.ok) {
+                            let msg = `Request failed (${resp.status})`;
+                            try { msg = (await resp.json()).message || msg; } catch { /* non-JSON body */ }
+                            signals.onResponse({ error: msg });
+                            return;
+                        }
+
+                        signals.onOpen();
+                        const reader = resp.body.getReader();
+                        const decoder = new TextDecoder();
+                        let buffer = '';
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            buffer += decoder.decode(value, { stream: true });
+                            const lines = buffer.split('\n');
+                            buffer = lines.pop() || ''; // keep any partial trailing line
+                            for (const line of lines) {
+                                if (!line.trim()) continue;
+                                let chunk;
+                                try { chunk = JSON.parse(line); } catch { continue; }
+                                if (chunk.error) {
+                                    signals.onResponse({ error: chunk.error });
+                                    signals.onClose();
+                                    return;
+                                }
+                                if (chunk.message && chunk.message.content) {
+                                    signals.onResponse({ text: chunk.message.content });
+                                }
+                            }
+                        }
+                        signals.onClose();
+                    } catch (e) {
+                        if (e.name === 'AbortError') { signals.onClose(); return; }
+                        signals.onResponse({ error: e.message || 'Network error' });
+                    }
+                }
+            };
+
+            // Dark theme to match the app
+            chatEl.messageStyles = {
+                default: {
+                    ai: { bubble: { backgroundColor: '#2a2d34', color: '#e8e8e8' } },
+                    user: { bubble: { backgroundColor: '#1f6feb', color: 'white' } }
+                }
+            };
+            chatEl.textInput = {
+                styles: { container: { backgroundColor: '#2a2d34', border: 'unset', color: '#e8e8e8' } },
+                placeholder: { text: 'Message the model…', style: { color: '#9aa0a6' } }
+            };
+            chatEl.submitButtonStyles = {
+                submit: { svg: { styles: { default: { filter: 'brightness(0) saturate(100%) invert(45%) sepia(96%) saturate(1500%) hue-rotate(199deg) brightness(97%) contrast(95%)' } } } }
+            };
+        }
+
         // Initial load
         document.addEventListener('DOMContentLoaded', () => {
             loadEndpoints();
             fetchRunningModels();
+            customElements.whenDefined('deep-chat').then(setupChat);
         });
 
         // Refresh running models periodically

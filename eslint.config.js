@@ -20,6 +20,7 @@ export default [
         formatBytes: 'readonly',
         refreshModels: 'readonly',
         // Node.js globals
+        AbortController: 'readonly',
         console: 'readonly',
         process: 'readonly',
         __dirname: 'readonly',

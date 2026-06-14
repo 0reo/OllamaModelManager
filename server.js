@@ -117,7 +117,7 @@ app.get('/api/models', async (req, res) => {
                     capabilities: detailsResponse.data.capabilities || '',
                     parameters: detailsResponse.data.parameters || '',
                     template: detailsResponse.data.template || '',
-                    tags: detailsResponse.data.model_info["general.tags"] || '',
+                    tags: detailsResponse.data.model_info['general.tags'] || '',
                     model_info: detailsResponse.data.model_info || ''
 
                 };
@@ -256,7 +256,65 @@ app.post('/api/update-model', async (req, res) => {
     await handleModelOperation(req, res, { model: modelName });
 });
 
-const PORT = 3000;
+// Chat with a model — streaming proxy to Ollama's /api/chat (NDJSON passed through)
+app.post('/api/chat', async (req, res) => {
+    const { model, messages, options } = req.body;
+    if (!model || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'A model and a non-empty messages array are required'
+        });
+    }
+
+    const controller = new AbortController();
+    let hasEnded = false;
+    const endResponse = (error) => {
+        if (hasEnded) return;
+        hasEnded = true;
+        if (error) {
+            try { res.write(JSON.stringify({ error: error.message }) + '\n'); } catch { /* client gone */ }
+        }
+        res.end();
+    };
+
+    // If the client disconnects mid-stream (e.g. user clicked Stop), abort upstream generation.
+    // Use res 'close' (fires when the connection ends) guarded by writableEnded — NOT req 'close',
+    // which fires as soon as express.json() finishes reading the body and would abort prematurely.
+    res.on('close', () => {
+        if (!res.writableEnded) controller.abort();
+    });
+
+    try {
+        const response = await axios({
+            method: 'post',
+            url: `${ollamaEndpoint}/api/chat`,
+            data: { model, messages, stream: true, ...(options ? { options } : {}) },
+            responseType: 'stream',
+            signal: controller.signal
+        });
+
+        res.setHeader('Content-Type', 'application/x-ndjson');
+        res.setHeader('Transfer-Encoding', 'chunked');
+
+        response.data.on('data', (chunk) => res.write(chunk));
+        response.data.on('end', () => endResponse());
+        response.data.on('error', (error) => endResponse(error));
+    } catch (error) {
+        if (error.code === 'ERR_CANCELED') return; // client aborted before the stream began
+        console.error('Chat request failed:', error.message);
+        if (!res.headersSent) {
+            res.status(502).json({
+                success: false,
+                message: 'Failed to reach the Ollama chat endpoint',
+                error: error.message
+            });
+        } else {
+            endResponse(error);
+        }
+    }
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

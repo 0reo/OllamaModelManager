@@ -129,5 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# graphify knowledge-graph output (generated, regenerable from source)
-graphify-out/
+# graphify: commit the persistent graph (graph.json/html, GRAPH_REPORT.md,
+# manifest.json) so it travels with the repo; ignore only the regenerable
+# SHA256 cache and machine-specific internal state (absolute local paths).
+graphify-out/cache/
+graphify-out/.graphify_*

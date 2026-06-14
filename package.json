@@ -4,10 +4,15 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "pm2 start ecosystem.config.cjs && echo 'Server running on http://localhost:3000'",
     "debug": "node --inspect server.js",
     "debug:dev": "nodemon --inspect server.js",
     "dev": "nodemon -e js,html,css server.js",
+    "stop": "pm2 stop ollama-model-manager",
+    "restart": "pm2 restart ollama-model-manager",
+    "kill": "pm2 delete ollama-model-manager",
+    "status": "pm2 status",
+    "logs": "pm2 logs ollama-model-manager",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -25,6 +30,7 @@
   "devDependencies": {
     "@eslint/js": "^9.20.0",
     "eslint": "^9.20.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "pm2": "^6.0.14"
   }
 }

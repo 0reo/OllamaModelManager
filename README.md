@@ -57,12 +57,29 @@ Development mode (with hot reload):
 npm run dev
 ```
 
-Production mode:
+Production mode (runs in the background via PM2):
 ```bash
 npm start
 ```
 
 The application will be available at `http://localhost:3000`
+
+### Managing the background process
+
+| Command | Description |
+|---|---|
+| `npm start` | Start in background |
+| `npm stop` | Stop the process |
+| `npm restart` | Restart the process |
+| `npm run kill` | Stop and remove from PM2 |
+| `npm run status` | Show process status |
+| `npm run logs` | Tail logs |
+
+To auto-start on system boot:
+```bash
+npx pm2 startup
+npx pm2 save
+```
 
 ### Using Docker
 
@@ -120,7 +137,7 @@ The application will be available at `http://localhost:3000`
 
 ## Development
 
-To run the application in development mode with hot reload:
+Run with hot reload (nodemon):
 
 ```bash
 npm run dev

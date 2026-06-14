@@ -4,51 +4,6 @@
   "graph": {
     "hyperedges": [
       {
-        "id": "model_pull_streaming_flow",
-        "label": "Model pull/update streaming flow (frontend to Ollama)",
-        "nodes": [
-          "public_index_pullmodel",
-          "server_route_pull",
-          "server_handlemodeloperation",
-          "server_streaming_proxy",
-          "server_client_disconnect"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 0.9,
-        "source_file": "server.js"
-      },
-      {
-        "id": "endpoint_switching_flow",
-        "label": "Multi-endpoint switching flow",
-        "nodes": [
-          "public_index_loadendpoints",
-          "public_index_setendpoint",
-          "server_route_endpoints",
-          "server_route_set_endpoint",
-          "server_ollamaendpoint"
-        ],
-        "relation": "participate_in",
-        "confidence": "EXTRACTED",
-        "confidence_score": 0.9,
-        "source_file": "server.js"
-      },
-      {
-        "id": "model_row_dom_render",
-        "label": "XSS-safe model row DOM rendering",
-        "nodes": [
-          "public_index_buildmodelrow",
-          "public_index_buildnamenode",
-          "public_index_buildnestednodes",
-          "public_index_el",
-          "public_index_xss_dom_escaping"
-        ],
-        "relation": "participate_in",
-        "confidence": "INFERRED",
-        "confidence_score": 0.85,
-        "source_file": "public/index.html"
-      },
-      {
         "nodes": [
           "demo_filter_input",
           "demo_model_list",
@@ -61,50 +16,38 @@
         "confidence": "EXTRACTED",
         "confidence_score": 1.0,
         "source_file": "demo.png"
+      },
+      {
+        "id": "streaming_proxy_flow",
+        "label": "NDJSON Streaming Proxy Flow (pull/update/chat)",
+        "nodes": [
+          "server_handlemodeloperation",
+          "ndjson_streaming",
+          "index",
+          "client_disconnect_gotcha"
+        ],
+        "relation": "participate_in",
+        "confidence": "INFERRED",
+        "confidence_score": 0.85,
+        "source_file": "server.js"
+      },
+      {
+        "id": "docker_deploy_pipeline",
+        "label": "Docker Build and Deploy Pipeline",
+        "nodes": [
+          "build",
+          "docker_compose",
+          "docker_compose_prebuilt",
+          "unraid"
+        ],
+        "relation": "participate_in",
+        "confidence": "INFERRED",
+        "confidence_score": 0.75,
+        "source_file": ".github/workflows/build.yml"
       }
     ]
   },
   "nodes": [
-    {
-      "label": "last-ndc.ts",
-      "file_type": "code",
-      "source_file": ".remember/tmp/last-ndc.ts",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "tmp_last_ndc",
-      "community": 11,
-      "norm_label": "last-ndc.ts"
-    },
-    {
-      "label": "last-save.json",
-      "file_type": "code",
-      "source_file": ".remember/tmp/last-save.json",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "tmp_last_save",
-      "community": 9,
-      "norm_label": "last-save.json"
-    },
-    {
-      "label": "session",
-      "file_type": "code",
-      "source_file": ".remember/tmp/last-save.json",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "tmp_last_save_session",
-      "community": 9,
-      "norm_label": "session"
-    },
-    {
-      "label": "line",
-      "file_type": "code",
-      "source_file": ".remember/tmp/last-save.json",
-      "source_location": "L1",
-      "_origin": "ast",
-      "id": "tmp_last_save_line",
-      "community": 9,
-      "norm_label": "line"
-    },
     {
       "label": "eslint.config.js",
       "file_type": "code",
@@ -112,7 +55,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "eslint_config",
-      "community": 10,
+      "community": 4,
       "norm_label": "eslint.config.js"
     },
     {
@@ -122,7 +65,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "package",
-      "community": 3,
+      "community": 0,
       "norm_label": "package.json"
     },
     {
@@ -132,7 +75,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "package_name",
-      "community": 3,
+      "community": 0,
       "norm_label": "name"
     },
     {
@@ -142,7 +85,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "package_version",
-      "community": 3,
+      "community": 0,
       "norm_label": "version"
     },
     {
@@ -152,7 +95,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "package_main",
-      "community": 3,
+      "community": 0,
       "norm_label": "main"
     },
     {
@@ -162,7 +105,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "package_type",
-      "community": 3,
+      "community": 0,
       "norm_label": "type"
     },
     {
@@ -302,7 +245,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "package_keywords",
-      "community": 3,
+      "community": 0,
       "norm_label": "keywords"
     },
     {
@@ -312,7 +255,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "package_author",
-      "community": 3,
+      "community": 0,
       "norm_label": "author"
     },
     {
@@ -322,7 +265,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "package_license",
-      "community": 3,
+      "community": 0,
       "norm_label": "license"
     },
     {
@@ -332,7 +275,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "package_description",
-      "community": 3,
+      "community": 0,
       "norm_label": "description"
     },
     {
@@ -342,7 +285,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "package_dependencies",
-      "community": 3,
+      "community": 0,
       "norm_label": "dependencies"
     },
     {
@@ -352,7 +295,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "package_dependencies_axios",
-      "community": 3,
+      "community": 0,
       "norm_label": "axios"
     },
     {
@@ -362,7 +305,7 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "package_dependencies_cors",
-      "community": 3,
+      "community": 0,
       "norm_label": "cors"
     },
     {
@@ -372,7 +315,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "package_dependencies_dotenv",
-      "community": 3,
+      "community": 0,
       "norm_label": "dotenv"
     },
     {
@@ -382,7 +325,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "package_dependencies_express",
-      "community": 3,
+      "community": 0,
       "norm_label": "express"
     },
     {
@@ -392,7 +335,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "package_devdependencies",
-      "community": 3,
+      "community": 0,
       "norm_label": "devdependencies"
     },
     {
@@ -402,7 +345,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "package_devdependencies_eslint_js",
-      "community": 3,
+      "community": 0,
       "norm_label": "@eslint/js"
     },
     {
@@ -412,7 +355,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "package_devdependencies_eslint",
-      "community": 3,
+      "community": 0,
       "norm_label": "eslint"
     },
     {
@@ -422,7 +365,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "package_devdependencies_nodemon",
-      "community": 3,
+      "community": 0,
       "norm_label": "nodemon"
     },
     {
@@ -432,7 +375,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "package_devdependencies_pm2",
-      "community": 3,
+      "community": 0,
       "norm_label": "pm2"
     },
     {
@@ -442,7 +385,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "public_swagger",
-      "community": 1,
+      "community": 9,
       "norm_label": "swagger.json"
     },
     {
@@ -452,7 +395,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "public_swagger_openapi",
-      "community": 1,
+      "community": 9,
       "norm_label": "openapi"
     },
     {
@@ -462,7 +405,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "public_swagger_info",
-      "community": 1,
+      "community": 9,
       "norm_label": "info"
     },
     {
@@ -472,7 +415,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "public_swagger_info_title",
-      "community": 1,
+      "community": 9,
       "norm_label": "title"
     },
     {
@@ -482,7 +425,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "public_swagger_info_description",
-      "community": 1,
+      "community": 9,
       "norm_label": "description"
     },
     {
@@ -492,7 +435,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "public_swagger_info_version",
-      "community": 1,
+      "community": 9,
       "norm_label": "version"
     },
     {
@@ -502,7 +445,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "public_swagger_servers",
-      "community": 1,
+      "community": 9,
       "norm_label": "servers"
     },
     {
@@ -842,7 +785,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "public_swagger_paths",
-      "community": 2,
+      "community": 3,
       "norm_label": "paths"
     },
     {
@@ -862,7 +805,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "public_swagger_api_endpoints_get",
-      "community": 4,
+      "community": 2,
       "norm_label": "get"
     },
     {
@@ -872,7 +815,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "public_swagger_get_summary",
-      "community": 4,
+      "community": 2,
       "norm_label": "summary"
     },
     {
@@ -882,7 +825,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "public_swagger_get_description",
-      "community": 4,
+      "community": 2,
       "norm_label": "description"
     },
     {
@@ -892,7 +835,7 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "public_swagger_get_responses",
-      "community": 4,
+      "community": 2,
       "norm_label": "responses"
     },
     {
@@ -902,7 +845,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "public_swagger_responses_200",
-      "community": 4,
+      "community": 2,
       "norm_label": "200"
     },
     {
@@ -912,7 +855,7 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "public_swagger_200_description",
-      "community": 4,
+      "community": 2,
       "norm_label": "description"
     },
     {
@@ -922,7 +865,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "public_swagger_200_content",
-      "community": 4,
+      "community": 10,
       "norm_label": "content"
     },
     {
@@ -932,7 +875,7 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "public_swagger_content_application_json",
-      "community": 4,
+      "community": 10,
       "norm_label": "application/json"
     },
     {
@@ -942,7 +885,7 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "public_swagger_paths_api_set_endpoint",
-      "community": 2,
+      "community": 3,
       "norm_label": "/api/set-endpoint"
     },
     {
@@ -952,7 +895,7 @@
       "source_location": "L112",
       "_origin": "ast",
       "id": "public_swagger_api_set_endpoint_post",
-      "community": 2,
+      "community": 3,
       "norm_label": "post"
     },
     {
@@ -962,7 +905,7 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "public_swagger_post_summary",
-      "community": 2,
+      "community": 3,
       "norm_label": "summary"
     },
     {
@@ -972,7 +915,7 @@
       "source_location": "L114",
       "_origin": "ast",
       "id": "public_swagger_post_description",
-      "community": 2,
+      "community": 3,
       "norm_label": "description"
     },
     {
@@ -982,7 +925,7 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "public_swagger_post_requestbody",
-      "community": 2,
+      "community": 3,
       "norm_label": "requestbody"
     },
     {
@@ -992,7 +935,7 @@
       "source_location": "L116",
       "_origin": "ast",
       "id": "public_swagger_requestbody_required",
-      "community": 2,
+      "community": 3,
       "norm_label": "required"
     },
     {
@@ -1002,7 +945,7 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "public_swagger_requestbody_content",
-      "community": 2,
+      "community": 3,
       "norm_label": "content"
     },
     {
@@ -1012,7 +955,7 @@
       "source_location": "L119",
       "_origin": "ast",
       "id": "public_swagger_application_json_schema",
-      "community": 4,
+      "community": 10,
       "norm_label": "schema"
     },
     {
@@ -1022,7 +965,7 @@
       "source_location": "L132",
       "_origin": "ast",
       "id": "public_swagger_post_responses",
-      "community": 2,
+      "community": 3,
       "norm_label": "responses"
     },
     {
@@ -1032,7 +975,7 @@
       "source_location": "L143",
       "_origin": "ast",
       "id": "public_swagger_responses_500",
-      "community": 4,
+      "community": 2,
       "norm_label": "500"
     },
     {
@@ -1042,7 +985,7 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "public_swagger_500_description",
-      "community": 4,
+      "community": 2,
       "norm_label": "description"
     },
     {
@@ -1052,7 +995,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "public_swagger_500_content",
-      "community": 4,
+      "community": 10,
       "norm_label": "content"
     },
     {
@@ -1062,7 +1005,7 @@
       "source_location": "L156",
       "_origin": "ast",
       "id": "public_swagger_paths_api_ps",
-      "community": 4,
+      "community": 2,
       "norm_label": "/api/ps"
     },
     {
@@ -1072,7 +1015,7 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "public_swagger_api_ps_get",
-      "community": 4,
+      "community": 2,
       "norm_label": "get"
     },
     {
@@ -1092,7 +1035,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "public_swagger_api_models_get",
-      "community": 4,
+      "community": 2,
       "norm_label": "get"
     },
     {
@@ -1132,7 +1075,7 @@
       "source_location": "L229",
       "_origin": "ast",
       "id": "public_swagger_delete_requestbody",
-      "community": 2,
+      "community": 3,
       "norm_label": "requestbody"
     },
     {
@@ -1142,7 +1085,7 @@
       "source_location": "L248",
       "_origin": "ast",
       "id": "public_swagger_delete_responses",
-      "community": 4,
+      "community": 2,
       "norm_label": "responses"
     },
     {
@@ -1152,7 +1095,7 @@
       "source_location": "L272",
       "_origin": "ast",
       "id": "public_swagger_paths_api_pull",
-      "community": 2,
+      "community": 3,
       "norm_label": "/api/pull"
     },
     {
@@ -1162,7 +1105,7 @@
       "source_location": "L273",
       "_origin": "ast",
       "id": "public_swagger_api_pull_post",
-      "community": 2,
+      "community": 3,
       "norm_label": "post"
     },
     {
@@ -1172,7 +1115,7 @@
       "source_location": "L296",
       "_origin": "ast",
       "id": "public_swagger_content_application_x_ndjson",
-      "community": 4,
+      "community": 10,
       "norm_label": "application/x-ndjson"
     },
     {
@@ -1182,7 +1125,7 @@
       "source_location": "L318",
       "_origin": "ast",
       "id": "public_swagger_responses_400",
-      "community": 2,
+      "community": 3,
       "norm_label": "400"
     },
     {
@@ -1192,7 +1135,7 @@
       "source_location": "L319",
       "_origin": "ast",
       "id": "public_swagger_400_description",
-      "community": 2,
+      "community": 3,
       "norm_label": "description"
     },
     {
@@ -1202,7 +1145,7 @@
       "source_location": "L320",
       "_origin": "ast",
       "id": "public_swagger_400_content",
-      "community": 4,
+      "community": 10,
       "norm_label": "content"
     },
     {
@@ -1212,7 +1155,7 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "public_swagger_paths_api_update_model",
-      "community": 2,
+      "community": 3,
       "norm_label": "/api/update-model"
     },
     {
@@ -1222,7 +1165,7 @@
       "source_location": "L332",
       "_origin": "ast",
       "id": "public_swagger_api_update_model_post",
-      "community": 2,
+      "community": 3,
       "norm_label": "post"
     },
     {
@@ -1232,7 +1175,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "server",
-      "community": 0,
+      "community": 4,
       "norm_label": "server.js"
     },
     {
@@ -1242,470 +1185,38 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "server_app",
-      "community": 0,
+      "community": 4,
       "norm_label": "app"
     },
     {
       "label": "getEndpoints()",
       "file_type": "code",
       "source_file": "server.js",
-      "source_location": "L36",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "server_getendpoints",
-      "community": 0,
+      "community": 4,
       "norm_label": "getendpoints()"
     },
     {
       "label": "handleModelOperation()",
       "file_type": "code",
       "source_file": "server.js",
-      "source_location": "L176",
+      "source_location": "L184",
       "_origin": "ast",
       "id": "server_handlemodeloperation",
-      "community": 0,
+      "community": 4,
       "norm_label": "handlemodeloperation()"
     },
     {
-      "label": "ollamaEndpoint (active endpoint module state)",
-      "file_type": "concept",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_ollamaendpoint",
-      "community": 0,
-      "norm_label": "ollamaendpoint (active endpoint module state)"
-    },
-    {
-      "label": "GET /api/endpoints",
+      "label": "server",
       "file_type": "code",
       "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_endpoints",
-      "community": 0,
-      "norm_label": "get /api/endpoints"
-    },
-    {
-      "label": "POST /api/set-endpoint",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_set_endpoint",
-      "community": 0,
-      "norm_label": "post /api/set-endpoint"
-    },
-    {
-      "label": "GET /api/models",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_models",
-      "community": 0,
-      "norm_label": "get /api/models"
-    },
-    {
-      "label": "DELETE /api/models",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_delete_models",
-      "community": 0,
-      "norm_label": "delete /api/models"
-    },
-    {
-      "label": "GET /api/ps",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_ps",
-      "community": 0,
-      "norm_label": "get /api/ps"
-    },
-    {
-      "label": "POST /api/pull",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_pull",
-      "community": 0,
-      "norm_label": "post /api/pull"
-    },
-    {
-      "label": "POST /api/update-model",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_update_model",
-      "community": 0,
-      "norm_label": "post /api/update-model"
-    },
-    {
-      "label": "POST /api/chat",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_chat",
-      "community": 0,
-      "norm_label": "post /api/chat"
-    },
-    {
-      "label": "GET /swagger.json",
-      "file_type": "code",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_route_swagger",
-      "community": 0,
-      "norm_label": "get /swagger.json"
-    },
-    {
-      "label": "NDJSON streaming proxy pattern",
-      "file_type": "rationale",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_streaming_proxy",
-      "community": 0,
-      "norm_label": "ndjson streaming proxy pattern"
-    },
-    {
-      "label": "res.on('close') client-disconnect detection",
-      "file_type": "rationale",
-      "source_file": "server.js",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "server_client_disconnect",
-      "community": 0,
-      "norm_label": "res.on('close') client-disconnect detection"
-    },
-    {
-      "label": "loadEndpoints",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_loadendpoints",
-      "community": 0,
-      "norm_label": "loadendpoints"
-    },
-    {
-      "label": "setEndpoint (frontend)",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_setendpoint",
-      "community": 0,
-      "norm_label": "setendpoint (frontend)"
-    },
-    {
-      "label": "refreshModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_refreshmodels",
-      "community": 0,
-      "norm_label": "refreshmodels"
-    },
-    {
-      "label": "displayModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_displaymodels",
-      "community": 8,
-      "norm_label": "displaymodels"
-    },
-    {
-      "label": "buildModelRow",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_buildmodelrow",
-      "community": 8,
-      "norm_label": "buildmodelrow"
-    },
-    {
-      "label": "printModel",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_printmodel",
-      "community": 8,
-      "norm_label": "printmodel"
-    },
-    {
-      "label": "buildNameNode",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_buildnamenode",
-      "community": 8,
-      "norm_label": "buildnamenode"
-    },
-    {
-      "label": "buildNestedNodes",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_buildnestednodes",
-      "community": 8,
-      "norm_label": "buildnestednodes"
-    },
-    {
-      "label": "el (createElement helper)",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_el",
-      "community": 8,
-      "norm_label": "el (createelement helper)"
-    },
-    {
-      "label": "sortModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_sortmodels",
-      "community": 8,
-      "norm_label": "sortmodels"
-    },
-    {
-      "label": "filterModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_filtermodels",
-      "community": 8,
-      "norm_label": "filtermodels"
-    },
-    {
-      "label": "deleteModel",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_deletemodel",
-      "community": 0,
-      "norm_label": "deletemodel"
-    },
-    {
-      "label": "deleteSelectedModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_deleteselectedmodels",
-      "community": 0,
-      "norm_label": "deleteselectedmodels"
-    },
-    {
-      "label": "updateModel (frontend)",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_updatemodel",
-      "community": 0,
-      "norm_label": "updatemodel (frontend)"
-    },
-    {
-      "label": "processUpdateStream",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_processupdatestream",
-      "community": 0,
-      "norm_label": "processupdatestream"
-    },
-    {
-      "label": "handleUpdateStatus",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_handleupdatestatus",
-      "community": 0,
-      "norm_label": "handleupdatestatus"
-    },
-    {
-      "label": "fetchRunningModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_fetchrunningmodels",
-      "community": 0,
-      "norm_label": "fetchrunningmodels"
-    },
-    {
-      "label": "pullModel",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_pullmodel",
-      "community": 0,
-      "norm_label": "pullmodel"
-    },
-    {
-      "label": "populateChatModels",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_populatechatmodels",
-      "community": 0,
-      "norm_label": "populatechatmodels"
-    },
-    {
-      "label": "setupChat (Deep Chat handler)",
-      "file_type": "code",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_setupchat",
-      "community": 0,
-      "norm_label": "setupchat (deep chat handler)"
-    },
-    {
-      "label": "DOM-node construction XSS hardening",
-      "file_type": "rationale",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_xss_dom_escaping",
-      "community": 8,
-      "norm_label": "dom-node construction xss hardening"
-    },
-    {
-      "label": "Deep Chat web component (SRI-pinned CDN)",
-      "file_type": "concept",
-      "source_file": "public/index.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "public_index_deepchat",
-      "community": 0,
-      "norm_label": "deep chat web component (sri-pinned cdn)"
+      "source_location": "L360",
+      "_origin": "ast",
+      "id": "server_server",
+      "community": 4,
+      "norm_label": "server"
     },
     {
       "label": "OpenAPI spec (swagger.json)",
@@ -1717,21 +1228,8 @@
       "author": null,
       "contributor": null,
       "id": "public_swagger_spec",
-      "community": 0,
+      "community": 11,
       "norm_label": "openapi spec (swagger.json)"
-    },
-    {
-      "label": "Swagger UI page",
-      "file_type": "document",
-      "source_file": "public/swagger.html",
-      "source_location": null,
-      "source_url": null,
-      "captured_at": null,
-      "author": null,
-      "contributor": null,
-      "id": "swagger_ui_page",
-      "community": 0,
-      "norm_label": "swagger ui page"
     },
     {
       "label": "API documentation",
@@ -1743,21 +1241,21 @@
       "author": null,
       "contributor": null,
       "id": "docs_api_reference",
-      "community": 0,
+      "community": 11,
       "norm_label": "api documentation"
     },
     {
-      "label": "Express-proxies-Ollama architecture",
-      "file_type": "concept",
-      "source_file": "server.js",
+      "label": "Swagger UI page",
+      "file_type": "document",
+      "source_file": "public/swagger.html",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
       "author": null,
       "contributor": null,
-      "id": "server_ollama_proxy_arch",
-      "community": 0,
-      "norm_label": "express-proxies-ollama architecture"
+      "id": "swagger_ui_page",
+      "community": 11,
+      "norm_label": "swagger ui page"
     },
     {
       "label": "Ollama Model Manager Web UI",
@@ -1888,28 +1386,285 @@
       "id": "demo_model_metadata",
       "community": 7,
       "norm_label": "model metadata columns (size/params/family/format/q-level)"
+    },
+    {
+      "label": "Ollama API Proxy Pattern",
+      "file_type": "concept",
+      "source_file": "server.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ollama_api_proxy",
+      "community": 4,
+      "norm_label": "ollama api proxy pattern"
+    },
+    {
+      "label": "Newline-Delimited JSON Streaming Pattern",
+      "file_type": "concept",
+      "source_file": "server.js",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ndjson_streaming",
+      "community": 4,
+      "norm_label": "newline-delimited json streaming pattern"
+    },
+    {
+      "label": "Multi-Endpoint Switching (module-level active endpoint)",
+      "file_type": "concept",
+      "source_file": "server.js",
+      "source_location": "41",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "multi_endpoint_switching",
+      "community": 8,
+      "norm_label": "multi-endpoint switching (module-level active endpoint)"
+    },
+    {
+      "label": "Reverse-Proxy Readiness (trust proxy / HOST bind)",
+      "file_type": "concept",
+      "source_file": "server.js",
+      "source_location": "15",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "reverse_proxy_readiness",
+      "community": 8,
+      "norm_label": "reverse-proxy readiness (trust proxy / host bind)"
+    },
+    {
+      "label": "Chat Inference Options Allow-List",
+      "file_type": "concept",
+      "source_file": "server.js",
+      "source_location": "298",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "chat_options_allowlist",
+      "community": 4,
+      "norm_label": "chat inference options allow-list"
+    },
+    {
+      "label": "Frontend SPA (public/index.html inline script)",
+      "file_type": "code",
+      "source_file": "public/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "index",
+      "community": 4,
+      "norm_label": "frontend spa (public/index.html inline script)"
+    },
+    {
+      "label": "Deep Chat Web Component",
+      "file_type": "concept",
+      "source_file": "public/index.html",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "deep_chat",
+      "community": 4,
+      "norm_label": "deep chat web component"
+    },
+    {
+      "label": "Dependabot Config",
+      "file_type": "document",
+      "source_file": ".github/dependabot.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "dependabot",
+      "community": 0,
+      "norm_label": "dependabot config"
+    },
+    {
+      "label": "Build and Push Workflow",
+      "file_type": "document",
+      "source_file": ".github/workflows/build.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "build",
+      "community": 8,
+      "norm_label": "build and push workflow"
+    },
+    {
+      "label": "Stale Issues/PRs Workflow",
+      "file_type": "document",
+      "source_file": ".github/workflows/stale.yml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "stale",
+      "community": 12,
+      "norm_label": "stale issues/prs workflow"
+    },
+    {
+      "label": "CLAUDE.md Project Guidance",
+      "file_type": "document",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "claude",
+      "community": 4,
+      "norm_label": "claude.md project guidance"
+    },
+    {
+      "label": "README",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "readme",
+      "community": 8,
+      "norm_label": "readme"
+    },
+    {
+      "label": "docker-compose.yaml (local build)",
+      "file_type": "document",
+      "source_file": "docker-compose.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "docker_compose",
+      "community": 8,
+      "norm_label": "docker-compose.yaml (local build)"
+    },
+    {
+      "label": "docker-compose-prebuilt.yaml",
+      "file_type": "document",
+      "source_file": "docker-compose-prebuilt.yaml",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "docker_compose_prebuilt",
+      "community": 8,
+      "norm_label": "docker-compose-prebuilt.yaml"
+    },
+    {
+      "label": "Unraid Deployment Guide",
+      "file_type": "document",
+      "source_file": "docs/unraid.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "unraid",
+      "community": 8,
+      "norm_label": "unraid deployment guide"
+    },
+    {
+      "label": "OLLAMA_ENDPOINTS Env Var",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "ollama_endpoints_env",
+      "community": 8,
+      "norm_label": "ollama_endpoints env var"
+    },
+    {
+      "label": "public/script.js (dead code)",
+      "file_type": "concept",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "dead_script",
+      "community": 4,
+      "norm_label": "public/script.js (dead code)"
+    },
+    {
+      "label": "res.on('close') Client-Disconnect Detection",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "client_disconnect_gotcha",
+      "community": 4,
+      "norm_label": "res.on('close') client-disconnect detection"
+    },
+    {
+      "label": "Model-Metadata DOM XSS Hardening Area",
+      "file_type": "rationale",
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "xss_hardening",
+      "community": 4,
+      "norm_label": "model-metadata dom xss hardening area"
     }
   ],
   "links": [
     {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": ".remember/tmp/last-save.json",
-      "source_location": "L1",
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.95,
+      "source_file": "eslint.config.js",
+      "source_location": null,
       "weight": 1.0,
-      "source": "tmp_last_save",
-      "target": "tmp_last_save_line",
-      "confidence_score": 1.0
+      "source": "eslint_config",
+      "target": "server"
     },
     {
-      "relation": "contains",
+      "relation": "references",
       "confidence": "EXTRACTED",
-      "source_file": ".remember/tmp/last-save.json",
-      "source_location": "L1",
+      "confidence_score": 1.0,
+      "source_file": "package.json",
+      "source_location": null,
       "weight": 1.0,
-      "source": "tmp_last_save",
-      "target": "tmp_last_save_session",
-      "confidence_score": 1.0
+      "source": "package",
+      "target": "eslint_config"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".github/dependabot.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dependabot",
+      "target": "package"
     },
     {
       "relation": "contains",
@@ -2020,6 +1775,16 @@
       "source": "package",
       "target": "package_version",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "package.json",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "package",
+      "target": "server"
     },
     {
       "relation": "contains",
@@ -3262,6 +3027,76 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "claude",
+      "target": "server"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/index.html",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "index",
+      "target": "server"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server.js",
+      "source_location": "298",
+      "weight": 1.0,
+      "source": "server",
+      "target": "chat_options_allowlist"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server.js",
+      "source_location": "41",
+      "weight": 1.0,
+      "source": "server",
+      "target": "multi_endpoint_switching"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server.js",
+      "source_location": "285",
+      "weight": 1.0,
+      "source": "server",
+      "target": "ndjson_streaming"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server.js",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "server",
+      "target": "ollama_api_proxy"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server.js",
+      "source_location": "15",
+      "weight": 1.0,
+      "source": "server",
+      "target": "reverse_proxy_readiness"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "server.js",
@@ -3275,7 +3110,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "server.js",
-      "source_location": "L36",
+      "source_location": "L44",
       "weight": 1.0,
       "source": "server",
       "target": "server_getendpoints",
@@ -3284,602 +3119,42 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
       "source_file": "server.js",
-      "source_location": "L176",
+      "source_location": "L184",
       "weight": 1.0,
       "source": "server",
-      "target": "server_handlemodeloperation",
+      "target": "server_handlemodeloperation"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "server.js",
+      "source_location": "L360",
+      "weight": 1.0,
+      "source": "server",
+      "target": "server_server",
       "confidence_score": 1.0
     },
     {
-      "relation": "calls",
+      "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
-      "source_file": "server.js",
+      "source_file": "CLAUDE.md",
       "source_location": null,
       "weight": 1.0,
-      "source": "server_route_endpoints",
-      "target": "server_getendpoints"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.65,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_set_endpoint",
-      "target": "server_getendpoints"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_handlemodeloperation",
-      "target": "server_client_disconnect"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_handlemodeloperation",
-      "target": "server_ollamaendpoint"
-    },
-    {
-      "relation": "implements",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_handlemodeloperation",
-      "target": "server_streaming_proxy"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_pull",
+      "source": "client_disconnect_gotcha",
       "target": "server_handlemodeloperation"
     },
     {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_update_model",
-      "target": "server_handlemodeloperation"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_delete_models",
-      "target": "server_ollamaendpoint"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_models",
-      "target": "server_ollamaendpoint"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_ps",
-      "target": "server_ollamaendpoint"
-    },
-    {
-      "relation": "shares_data_with",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_set_endpoint",
-      "target": "server_ollamaendpoint"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_loadendpoints",
-      "target": "server_route_endpoints"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/swagger.json",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_swagger_spec",
-      "target": "server_route_endpoints"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_endpoints",
-      "target": "server_ollama_proxy_arch"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/api.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "docs_api_reference",
-      "target": "server_route_set_endpoint"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_setendpoint",
-      "target": "server_route_set_endpoint"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/api.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "docs_api_reference",
-      "target": "server_route_models"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_refreshmodels",
-      "target": "server_route_models"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/swagger.json",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_swagger_spec",
-      "target": "server_route_models"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_models",
-      "target": "server_ollama_proxy_arch"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_deletemodel",
-      "target": "server_route_delete_models"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_deleteselectedmodels",
-      "target": "server_route_delete_models"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/api.md",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "docs_api_reference",
-      "target": "server_route_ps"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_fetchrunningmodels",
-      "target": "server_route_ps"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_pullmodel",
-      "target": "server_route_pull"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_updatemodel",
-      "target": "server_route_update_model"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_setupchat",
-      "target": "server_route_chat"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_chat",
-      "target": "server_client_disconnect"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_chat",
-      "target": "server_ollama_proxy_arch"
-    },
-    {
       "relation": "implements",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server.js",
-      "source_location": null,
+      "source_location": "184",
       "weight": 1.0,
-      "source": "server_route_chat",
-      "target": "server_streaming_proxy"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_route_swagger",
-      "target": "public_swagger_spec"
-    },
-    {
-      "relation": "semantically_similar_to",
-      "confidence": "INFERRED",
-      "confidence_score": 0.8,
-      "source_file": "server.js",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "server_streaming_proxy",
-      "target": "public_index_processupdatestream"
-    },
-    {
-      "relation": "references",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_pullmodel",
-      "target": "server_streaming_proxy"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_loadendpoints",
-      "target": "public_index_setendpoint"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_setendpoint",
-      "target": "public_index_fetchrunningmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_setendpoint",
-      "target": "public_index_refreshmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_deletemodel",
-      "target": "public_index_refreshmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_deleteselectedmodels",
-      "target": "public_index_refreshmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_pullmodel",
-      "target": "public_index_refreshmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_refreshmodels",
-      "target": "public_index_displaymodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_refreshmodels",
-      "target": "public_index_populatechatmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_updatemodel",
-      "target": "public_index_refreshmodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_displaymodels",
-      "target": "public_index_buildmodelrow"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_filtermodels",
-      "target": "public_index_displaymodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_sortmodels",
-      "target": "public_index_displaymodels"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildmodelrow",
-      "target": "public_index_buildnamenode"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildmodelrow",
-      "target": "public_index_deletemodel"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildmodelrow",
-      "target": "public_index_el"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildmodelrow",
-      "target": "public_index_printmodel"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildmodelrow",
-      "target": "public_index_updatemodel"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_printmodel",
-      "target": "public_index_buildnestednodes"
-    },
-    {
-      "relation": "calls",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildnamenode",
-      "target": "public_index_el"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildnamenode",
-      "target": "public_index_xss_dom_escaping"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_buildnestednodes",
-      "target": "public_index_xss_dom_escaping"
-    },
-    {
-      "relation": "implements",
-      "confidence": "INFERRED",
-      "confidence_score": 0.75,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_el",
-      "target": "public_index_xss_dom_escaping"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_updatemodel",
-      "target": "public_index_processupdatestream"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_processupdatestream",
-      "target": "public_index_handleupdatestatus"
-    },
-    {
-      "relation": "calls",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_setupchat",
-      "target": "public_index_populatechatmodels"
-    },
-    {
-      "relation": "references",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "public/index.html",
-      "source_location": null,
-      "weight": 1.0,
-      "source": "public_index_setupchat",
-      "target": "public_index_deepchat"
+      "source": "server_handlemodeloperation",
+      "target": "ndjson_streaming"
     },
     {
       "relation": "conceptually_related_to",
@@ -4010,54 +3285,179 @@
       "weight": 1.0,
       "source": "demo_model_metadata",
       "target": "demo_model_list"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/index.html",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "index",
+      "target": "ndjson_streaming"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server.js",
+      "source_location": "45",
+      "weight": 1.0,
+      "source": "multi_endpoint_switching",
+      "target": "ollama_endpoints_env"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "readme",
+      "target": "reverse_proxy_readiness"
+    },
+    {
+      "relation": "shares_data_with",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "public/index.html",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "deep_chat",
+      "target": "chat_options_allowlist"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "claude",
+      "target": "index"
+    },
+    {
+      "relation": "semantically_similar_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.65,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "dead_script",
+      "target": "index"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "public/index.html",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "index",
+      "target": "deep_chat"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "xss_hardening",
+      "target": "index"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": ".github/workflows/build.yml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "build",
+      "target": "docker_compose"
+    },
+    {
+      "relation": "references",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docker-compose-prebuilt.yaml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docker_compose_prebuilt",
+      "target": "build"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CLAUDE.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "claude",
+      "target": "dead_script"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "readme",
+      "target": "docker_compose"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "readme",
+      "target": "ollama_endpoints_env"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docker-compose.yaml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docker_compose",
+      "target": "ollama_endpoints_env"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docker-compose-prebuilt.yaml",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "docker_compose_prebuilt",
+      "target": "ollama_endpoints_env"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "docs/unraid.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "unraid",
+      "target": "docker_compose_prebuilt"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/unraid.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "unraid",
+      "target": "ollama_endpoints_env"
     }
   ],
   "hyperedges": [
-    {
-      "id": "model_pull_streaming_flow",
-      "label": "Model pull/update streaming flow (frontend to Ollama)",
-      "nodes": [
-        "public_index_pullmodel",
-        "server_route_pull",
-        "server_handlemodeloperation",
-        "server_streaming_proxy",
-        "server_client_disconnect"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 0.9,
-      "source_file": "server.js"
-    },
-    {
-      "id": "endpoint_switching_flow",
-      "label": "Multi-endpoint switching flow",
-      "nodes": [
-        "public_index_loadendpoints",
-        "public_index_setendpoint",
-        "server_route_endpoints",
-        "server_route_set_endpoint",
-        "server_ollamaendpoint"
-      ],
-      "relation": "participate_in",
-      "confidence": "EXTRACTED",
-      "confidence_score": 0.9,
-      "source_file": "server.js"
-    },
-    {
-      "id": "model_row_dom_render",
-      "label": "XSS-safe model row DOM rendering",
-      "nodes": [
-        "public_index_buildmodelrow",
-        "public_index_buildnamenode",
-        "public_index_buildnestednodes",
-        "public_index_el",
-        "public_index_xss_dom_escaping"
-      ],
-      "relation": "participate_in",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "source_file": "public/index.html"
-    },
     {
       "nodes": [
         "demo_filter_input",
@@ -4071,7 +3471,35 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "demo.png"
+    },
+    {
+      "id": "streaming_proxy_flow",
+      "label": "NDJSON Streaming Proxy Flow (pull/update/chat)",
+      "nodes": [
+        "server_handlemodeloperation",
+        "ndjson_streaming",
+        "index",
+        "client_disconnect_gotcha"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "server.js"
+    },
+    {
+      "id": "docker_deploy_pipeline",
+      "label": "Docker Build and Deploy Pipeline",
+      "nodes": [
+        "build",
+        "docker_compose",
+        "docker_compose_prebuilt",
+        "unraid"
+      ],
+      "relation": "participate_in",
+      "confidence": "INFERRED",
+      "confidence_score": 0.75,
+      "source_file": ".github/workflows/build.yml"
     }
   ],
-  "built_at_commit": "460ca5281907cff0fad70e5ee4d26dc13e3cfa56"
+  "built_at_commit": "c39e9376d8eb119a7c3f3b3a1bad721f1e85deac"
 }

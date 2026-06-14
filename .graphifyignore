@@ -1,0 +1,7 @@
+# Files graphify must NOT ingest into the knowledge graph.
+# This repo is public — keep private session state and secrets out of the graph.
+.remember/
+.env
+.env.*
+graphify-out/
+node_modules/

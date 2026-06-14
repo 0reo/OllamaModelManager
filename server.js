@@ -187,7 +187,11 @@ const handleModelOperation = async (req, res, operation) => {
         if (error) {
             try {
                 res.write(JSON.stringify({ status: 'error', error: error.message }) + '\n');
-            } catch { /* socket already gone */ }
+            } catch (writeErr) {
+                // The client is gone, so it can't receive this — but log why the pull failed so
+                // the operator isn't left with no record of a genuine upstream fault.
+                console.error('Failed to deliver pull error to client (socket closed?):', error.message, writeErr.message);
+            }
         }
         try { res.end(); } catch { /* socket already gone */ }
     };

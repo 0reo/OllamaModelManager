@@ -629,6 +629,7 @@
         // Progress-bar helpers. The fill is "indeterminate" (animated stripe) during stages with
         // no byte counts (pulling manifest, verifying), and a real width % once we have totals.
         function setPullProgress(pct) {
+            if (!Number.isFinite(pct)) pct = 0;
             const fill = document.getElementById('pullProgressFill');
             fill.classList.remove('indeterminate');
             fill.style.width = Math.max(0, Math.min(100, pct)) + '%';
@@ -652,10 +653,16 @@
                 return;
             }
 
+            // A pull is already running: pullController + the cancel button are shared module
+            // state, so starting a second pull would orphan the first (uncancellable, racing UI).
+            if (pullController) return;
+
             const progress = document.getElementById('pullProgress');
             const progressStatus = document.getElementById('pullProgressStatus');
             const progressMeta = document.getElementById('pullProgressMeta');
             const cancelBtn = document.getElementById('pullCancelBtn');
+            const pullBtn = document.querySelector('.model-pull-row .pull-btn');
+            if (pullBtn) pullBtn.disabled = true;
 
             statusElement.className = 'pull-status';
             statusElement.textContent = '';
@@ -689,6 +696,7 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let buffer = '';
+                let sawSuccess = false; // Ollama emits {status:"success"} as the terminal message
 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -706,6 +714,7 @@
                         if (update.status === 'error') {
                             throw new Error(update.error || 'Pull failed');
                         }
+                        if (update.status === 'success') sawSuccess = true;
 
                         progressStatus.textContent = update.status || 'Working…';
 
@@ -731,6 +740,12 @@
                             setPullIndeterminate();
                         }
                     }
+                }
+
+                // A stream that ended without the terminal success message means the download was
+                // truncated (Ollama died, socket half-closed) — don't report a false success.
+                if (!sawSuccess) {
+                    throw new Error('Pull ended before completion — the model may not be fully downloaded.');
                 }
 
                 setPullProgress(100);
@@ -759,6 +774,7 @@
             } finally {
                 pullController = null;
                 cancelBtn.onclick = null;
+                if (pullBtn) pullBtn.disabled = false;
             }
         }
 

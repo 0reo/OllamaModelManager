@@ -19,6 +19,7 @@ A web-based management interface for Ollama endpoints, allowing you to manage an
 - Running Models Stats
 - Pull Models from Ollama Hub
 - Swagger API Documentation
+- Installable as a PWA (offline app shell; live data always fetched fresh)
 - [Unraid Deployment Guide (untested)](https://github.com/d3v0ps-cloud/OllamaModelManager/blob/main/docs/unraid.md)
 
 ## Prerequisites
@@ -163,6 +164,20 @@ ollama.example.com {
 > To install the app as a PWA later, the origin must use a **browser-trusted**
 > certificate (e.g. Let's Encrypt) — a self-signed / internal-CA cert will block
 > service-worker registration.
+
+## Install as an app (PWA)
+
+The app ships a web manifest and a service worker, so it can be installed and run
+in its own window.
+
+- On `http://localhost:3000` (a secure context), open the app and use the
+  browser's **Install** action (Chrome/Brave: the install icon in the address
+  bar; Android: "Add to Home screen").
+- The service worker caches the **app shell** (HTML/CSS/icons) for offline launch,
+  but **always fetches live Ollama data from the network** — model lists and chat
+  are never served stale from cache.
+- Installing over a custom domain requires a **browser-trusted HTTPS** certificate
+  (see the note above); a self-signed / internal-CA cert blocks installation.
 
 ## Development
 

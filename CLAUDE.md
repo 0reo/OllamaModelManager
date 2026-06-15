@@ -31,8 +31,11 @@ A web UI to manage Ollama models across one or more Ollama endpoints (list/pull/
 
 - **In streaming routes, detect client disconnect with `res.on('close')` guarded by `!res.writableEnded` — never `req.on('close')`.** `express.json()` consumes the request body, so the `req` `'close'` event fires immediately and would abort the upstream Ollama request before it starts (yields empty responses).
 - The inline `<script>` in `index.html` is **not** linted (ESLint only covers `**/*.js`); `script.js` is.
+- ESLint (flat config) lints **all** `**/*.js`, so new non-standard JS needs a config entry: a `files: ['public/sw.js']` block adding service-worker globals (`self`, `caches`, …), and an `ignores` for vendored minified bundles (e.g. `public/vendor/**`).
 - Model metadata is interpolated into the DOM in places (`displayModels`, `printModel`/`formatNestedHtml`) — escape model-derived values (name/tags/capabilities) before adding to such code (known XSS hardening area).
 
 ## Repository
 
 This is a fork. `main` is kept identical to upstream `d3v0ps-cloud/OllamaModelManager`; **make changes on `dev`** (or feature branches off `dev`), never on `main`.
+
+- **This repo is PUBLIC and mirrors to GitHub** (`github.com/0reo/OllamaModelManager`). Never commit private infra/identity: homelab hostnames, Tailnet IPs, container/machine names, absolute `/home/...` paths, or `.remember/` content.
